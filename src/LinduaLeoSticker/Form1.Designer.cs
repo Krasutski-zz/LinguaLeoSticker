@@ -36,29 +36,34 @@
             // 
             // lb_text
             // 
-            this.lb_text.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lb_text.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lb_text.AutoSize = true;
             this.lb_text.Location = new System.Drawing.Point(76, 35);
             this.lb_text.Name = "lb_text";
             this.lb_text.Size = new System.Drawing.Size(96, 13);
             this.lb_text.TabIndex = 0;
             this.lb_text.Text = "Lingua Leo Sticker";
+            this.lb_text.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lb_text_MouseDown);
+            this.lb_text.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lb_text_MouseMove);
+            this.lb_text.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lb_text_MouseUp);
             // 
             // lb_text_translate
             // 
-            this.lb_text_translate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lb_text_translate.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lb_text_translate.AutoSize = true;
             this.lb_text_translate.Location = new System.Drawing.Point(76, 133);
             this.lb_text_translate.Name = "lb_text_translate";
             this.lb_text_translate.Size = new System.Drawing.Size(90, 13);
             this.lb_text_translate.TabIndex = 1;
             this.lb_text_translate.Text = "LinguaLeoSticker";
+            this.lb_text_translate.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lb_text_translate_MouseDown);
+            this.lb_text_translate.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lb_text_translate_MouseMove);
+            this.lb_text_translate.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lb_text_translate_MouseUp);
             // 
             // tmrChangeWord
             // 
             this.tmrChangeWord.Interval = 1000;
+            this.tmrChangeWord.Tick += new System.EventHandler(this.tmrChangeWord_Tick);
             // 
             // frmSticker
             // 

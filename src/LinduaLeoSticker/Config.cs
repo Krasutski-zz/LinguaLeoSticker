@@ -54,11 +54,11 @@ namespace ConfigFile
             BackgroundColor = Color.Yellow;
             TextColor = Color.Black;
             TextTranslateColor = Color.Black;
-            TimeText = 1000;
-            TimeTextTranslate = 1000;
-            DictonaryPath = "";
-            TextFont = new Font(new FontFamily("Times New Roman"), 16, FontStyle.Regular, GraphicsUnit.Pixel);
-            TextTranslateFont = new Font(new FontFamily("Times New Roman"), 14, FontStyle.Regular, GraphicsUnit.Pixel);
+            TimeText = 2000;
+            TimeTextTranslate = 2000;
+            DictonaryPath = "default.txt";
+            TextFont = new Font(new FontFamily("Times New Roman"), 20, FontStyle.Regular, GraphicsUnit.Pixel);
+            TextTranslateFont = new Font(new FontFamily("Times New Roman"), 18, FontStyle.Regular, GraphicsUnit.Pixel);
 
             try
             {
