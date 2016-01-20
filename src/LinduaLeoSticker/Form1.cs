@@ -14,6 +14,8 @@ namespace LinduaLeoSticker
 {
     public partial class frmSticker : Form
     {
+        Config AppConf = null;
+
         private Point mouseOffset;
         private bool isMouseDown = false;
 
@@ -31,7 +33,7 @@ namespace LinduaLeoSticker
         {
             TopMost = true;
             InitializeComponent();
-            Config AppConf = new Config("config.xml");
+            AppConf = new Config("config.xml");
 
             this.Height = AppConf.Height;
             this.Width = AppConf.Width;
@@ -44,7 +46,8 @@ namespace LinduaLeoSticker
             this.lb_text_translate.Font = AppConf.TextTranslateFont;
             this.TimerFirstWord = AppConf.TimeText;
             this.TimerSecondWord = AppConf.TimeTextTranslate;
-            this.DictonatyPath = AppConf.DictonaryPath;        
+            this.DictonatyPath = AppConf.DictonaryPath;
+            
         }
 
         private void MoveForm_DownEvent(MouseEventArgs e)
@@ -255,6 +258,11 @@ namespace LinduaLeoSticker
         {
             tmrChangeWord.Interval = 1;
             tmrChangeWord.Enabled = true;
+        }
+
+        private void frmSticker_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            AppConf.saveConfig();   
         }
 
     }

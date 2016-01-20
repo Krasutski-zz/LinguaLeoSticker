@@ -79,6 +79,7 @@
             this.Name = "frmSticker";
             this.ShowInTaskbar = false;
             this.Text = "LinduaLeoSticker";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmSticker_FormClosing);
             this.Load += new System.EventHandler(this.frmSticker_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frmSticker_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.frmSticker_MouseMove);
