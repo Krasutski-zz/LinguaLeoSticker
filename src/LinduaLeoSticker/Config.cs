@@ -16,14 +16,15 @@ namespace ConfigFile
         public int Y;
         public int Width;
         public int Height;
-        public int BackgroundColor;
-        public int TextColor;
-        public int TextTranslateColor;
+        public UInt32 BackgroundColor;
+        public UInt32 TextColor;
+        public UInt32 TextTranslateColor;
         public int TimeText;
         public int TimeTextTranslate;
         public string DictonaryPath;
         public string TextFont;
         public string TextTranslateFont;
+        public bool AutoLoad;
    
     }
 
@@ -43,27 +44,28 @@ namespace ConfigFile
         public string DictonaryPath { get; set; }
         public Font TextFont { get; set; }
         public Font TextTranslateFont { get; set; }
+        public bool AutoLoad { get; set; }
 
 
         [XmlElement("BackgroundColor")]
-        public int BackgroundColorConvert
+        public UInt32 BackgroundColorConvert
         {
-            get { return BackgroundColor.ToArgb(); }
-            set { BackgroundColor = Color.FromArgb(value); }
+            get { return (UInt32)BackgroundColor.ToArgb(); }
+            set { BackgroundColor = Color.FromArgb((int)value); }
         }
 
         [XmlElement("TextColor")]
-        public int TextColorConvert
+        public UInt32 TextColorConvert
         {
-            get { return TextColor.ToArgb(); }
-            set { TextColor = Color.FromArgb(value); }
+            get { return (UInt32)TextColor.ToArgb(); }
+            set { TextColor = Color.FromArgb((int)value); }
         }
 
         [XmlElement("TextTranslateColor")]
-        public int TextTranslateColorConvert
+        public UInt32 TextTranslateColorConvert
         {
-            get { return TextTranslateColor.ToArgb(); }
-            set { TextTranslateColor = Color.FromArgb(value); }
+            get { return (UInt32)TextTranslateColor.ToArgb(); }
+            set { TextTranslateColor = Color.FromArgb((int)value); }
         }
 
         [XmlElement("TextTranslateFont")]
@@ -94,8 +96,9 @@ namespace ConfigFile
             TimeText = 2000;
             TimeTextTranslate = 2000;
             DictonaryPath = "default.txt";
-            TextFont = new Font(new FontFamily("Courier New"), 20, FontStyle.Regular, GraphicsUnit.Pixel);
-            TextTranslateFont = new Font(new FontFamily("Courier New"), 18, FontStyle.Regular, GraphicsUnit.Pixel);
+            TextFont = new Font(new FontFamily("Arial"), 20, FontStyle.Regular, GraphicsUnit.Pixel);
+            TextTranslateFont = new Font(new FontFamily("Arial"), 18, FontStyle.Regular, GraphicsUnit.Pixel);
+            AutoLoad = true;
 
             try
             {
@@ -117,7 +120,8 @@ namespace ConfigFile
                 TimeTextTranslate = config.TimeTextTranslate;
                 DictonaryPath = config.DictonaryPath;
                 TextFontConvert = config.TextFont;
-                TextTranslateFontConvert = config.TextTranslateFont;      
+                TextTranslateFontConvert = config.TextTranslateFont;
+                AutoLoad = config.AutoLoad;      
             }
             catch (Exception ext)
             {
@@ -146,7 +150,8 @@ namespace ConfigFile
                 config.TimeTextTranslate = TimeTextTranslate;
                 config.DictonaryPath = DictonaryPath;
                 config.TextFont = TextFontConvert;
-                config.TextTranslateFont = TextTranslateFontConvert;   
+                config.TextTranslateFont = TextTranslateFontConvert;
+                config.AutoLoad = AutoLoad;   
 
                 XmlSerializer ser = new XmlSerializer(typeof(ParamList));
                 StreamWriter writer = new StreamWriter(FileName);

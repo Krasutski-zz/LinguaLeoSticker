@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ConfigFile;
 using System.IO;
+using Microsoft.Win32;
 
 namespace LinduaLeoSticker
 {
@@ -47,6 +48,24 @@ namespace LinduaLeoSticker
             this.TimerFirstWord = AppConf.TimeText;
             this.TimerSecondWord = AppConf.TimeTextTranslate;
             this.DictonatyPath = AppConf.DictonaryPath;
+
+            RegistryKey rkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            if (AppConf.AutoLoad)
+            {
+                rkey.SetValue(Application.ProductName, Application.ExecutablePath.ToString());
+            }
+            else
+            {
+                try
+                {
+                    rkey.DeleteValue(Application.ProductName);
+                }
+                catch(Exception)
+                {
+
+                }
+            }
             
         }
 
@@ -199,7 +218,7 @@ namespace LinduaLeoSticker
         private string[] DictonaryGetNextCouple(bool random)
         {
             string[] couple = new string[2];
-            const char separator = '\\';
+            const char separator = ':';
 
             if (random)
             {
