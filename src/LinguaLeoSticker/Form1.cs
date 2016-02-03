@@ -11,7 +11,7 @@ using ConfigFile;
 using System.IO;
 using Microsoft.Win32;
 
-namespace LinduaLeoSticker
+namespace LinguaLeoSticker
 {
     public partial class frmSticker : Form
     {

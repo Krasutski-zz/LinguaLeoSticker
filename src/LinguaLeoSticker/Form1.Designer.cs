@@ -1,4 +1,4 @@
-﻿namespace LinduaLeoSticker
+﻿namespace LinguaLeoSticker
 {
     partial class frmSticker
     {
@@ -78,7 +78,7 @@
             this.MinimizeBox = false;
             this.Name = "frmSticker";
             this.ShowInTaskbar = false;
-            this.Text = "LinduaLeoSticker";
+            this.Text = "LinguaLeoSticker";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmSticker_FormClosing);
             this.Load += new System.EventHandler(this.frmSticker_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frmSticker_MouseDown);

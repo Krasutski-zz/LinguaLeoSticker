@@ -7,8 +7,8 @@
     <ProjectGuid>{E6B1732D-49DC-4B01-98B2-CE31E0397039}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LinduaLeoSticker</RootNamespace>
-    <AssemblyName>LinduaLeoSticker</AssemblyName>
+    <RootNamespace>LinguaLeoSticker</RootNamespace>
+    <AssemblyName>LinguaLeoSticker</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -35,7 +35,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>LinduaLeoSticker.Program</StartupObject>
+    <StartupObject>LinguaLeoSticker.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
