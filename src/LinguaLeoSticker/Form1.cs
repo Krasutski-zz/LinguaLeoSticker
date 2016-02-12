@@ -101,6 +101,9 @@ namespace LinguaLeoSticker
             if (e.Button == MouseButtons.Left)
             {
                 isMouseDown = false;
+
+                AppConf.Y = this.Top;
+                AppConf.X = this.Left;
             }
         }
 
@@ -162,6 +165,10 @@ namespace LinguaLeoSticker
                 lb_text_translate.Text = "Can\'t open dictonary file!";
             }
 
+
+            this.Top = AppConf.Y;
+            this.Left = AppConf.X;
+               
             AlignTextOnForm();
         }
 
