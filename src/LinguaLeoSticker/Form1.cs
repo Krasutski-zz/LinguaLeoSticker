@@ -34,7 +34,8 @@ namespace LinguaLeoSticker
         {
             TopMost = true;
             InitializeComponent();
-            AppConf = new Config("config.xml");
+
+            AppConf = new Config(Path.Combine(Application.StartupPath,"config.xml"));
 
             this.Height = AppConf.Height;
             this.Width = AppConf.Width;
@@ -155,7 +156,7 @@ namespace LinguaLeoSticker
         private void frmSticker_Load(object sender, EventArgs e)
         {
             ///try open dictonery
-            if (DictonaryLoad(DictonatyPath) == true)
+            if (DictonaryLoad(Path.Combine(Application.StartupPath,DictonatyPath)) == true)
             {
                 lb_text_translate.Text = DictonatyPath;
                 StartShow();
