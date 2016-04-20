@@ -11,6 +11,8 @@ using ConfigFile;
 using System.IO;
 using Microsoft.Win32;
 
+using KeyboardHook;
+
 namespace LinguaLeoSticker
 {
     public partial class frmSticker : Form
@@ -36,6 +38,9 @@ namespace LinguaLeoSticker
         const int border_size = 10;
 
         const int ButtonNaviWidth = 50;
+
+
+        GlobalKeyboardHook hk = new GlobalKeyboardHook();
 
         enum DictonatyAccess_e
         {
@@ -212,6 +217,20 @@ namespace LinguaLeoSticker
 
             btn_Delete.Left = btn_Back.Width;
             btn_Delete.Width = this.Width - 2 * ButtonNaviWidth;
+
+            hk.key_hook_evt += key_hook;
+        }
+
+        static Keys PrevKey;
+
+        public void key_hook(Keys key)
+        {
+            if ((key == Keys.X) && (PrevKey == Keys.LMenu))
+            {
+                ExtendColapseForm();
+            }
+
+            PrevKey = key;
         }
 
         private int GetFormHeight(bool extended)
@@ -419,7 +438,7 @@ namespace LinguaLeoSticker
             AppConf.saveConfig();   
         }
 
-        private void frmSticker_DoubleClick(object sender, EventArgs e)
+        private void ExtendColapseForm()
         {
             Form_Is_Extended = !Form_Is_Extended;
             AlignTextOnForm();
@@ -437,6 +456,11 @@ namespace LinguaLeoSticker
             {
                 StartShow();
             }
+        }
+
+        private void frmSticker_DoubleClick(object sender, EventArgs e)
+        {
+            ExtendColapseForm();
         }
 
         private void AddToDictonary()
