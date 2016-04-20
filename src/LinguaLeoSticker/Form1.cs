@@ -451,6 +451,10 @@ namespace LinguaLeoSticker
                 {
                     DisplayCouple(couple[0], couple[1]);
                 }
+
+                txtWord.Text = "";
+                txtTranslate.Text = "";
+                txtWord.Focus();
             }
             else
             {
