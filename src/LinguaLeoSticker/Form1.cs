@@ -30,6 +30,22 @@ namespace LinguaLeoSticker
         private int step_display = 0;
         private string[] current_couple = null;
 
+        private bool Form_Is_Extended = false;
+
+        const char separator = ':';
+        const int border_size = 10;
+
+        const int ButtonNaviWidth = 50;
+
+        enum DictonatyAccess_e
+        {
+            DictAccess_Next,
+            DictAccess_Prev,
+            DictAccess_Current,
+            DictAccess_Random
+        };
+
+
         public frmSticker()
         {
             TopMost = true;
@@ -42,10 +58,10 @@ namespace LinguaLeoSticker
             this.Top = AppConf.Y;
             this.Left = AppConf.X;
             this.BackColor = AppConf.BackgroundColor;
-            this.lb_text.ForeColor = AppConf.TextColor;
-            this.lb_text_translate.ForeColor = AppConf.TextTranslateColor;
-            this.lb_text.Font = AppConf.TextFont;
-            this.lb_text_translate.Font = AppConf.TextTranslateFont;
+            lb_word.ForeColor = AppConf.TextColor;
+            lb_translate.ForeColor = AppConf.TextTranslateColor;
+            lb_word.Font = AppConf.TextFont;
+            lb_translate.Font = AppConf.TextTranslateFont;
             this.TimerFirstWord = AppConf.TimeText;
             this.TimerSecondWord = AppConf.TimeTextTranslate;
             this.DictonatyPath = AppConf.DictonaryPath;
@@ -158,54 +174,91 @@ namespace LinguaLeoSticker
             ///try open dictonery
             if (DictonaryLoad(Path.Combine(Application.StartupPath,DictonatyPath)) == true)
             {
-                lb_text_translate.Text = DictonatyPath;
+                lb_translate.Text = DictonatyPath;
                 StartShow();
             }
             else
             {
-                lb_text_translate.Text = "Can\'t open dictonary file!";
+                lb_translate.Text = "Can\'t open dictonary file!";
             }
-
 
             this.Top = AppConf.Y;
             this.Left = AppConf.X;
                
             AlignTextOnForm();
+
+            /* Add align text boxses */
+            txtWord.Left = 0;
+            txtWord.Top = lb_translate.Top + lb_translate.Height + border_size;
+            txtWord.Width = this.Width;
+
+            txtTranslate.Left = 0;
+            txtTranslate.Top = txtWord.Top + txtWord.Height;
+            txtTranslate.Width = this.Width;
+
+            /* Add align button */
+            btnAddToDictonary.Left = 0;
+            btnAddToDictonary.Top = txtTranslate.Top + txtTranslate.Height;
+            btnAddToDictonary.Width = this.Width;
+
+            btn_Back.Top = btn_Delete.Top = btn_Forward.Top = btnAddToDictonary.Top + btnAddToDictonary.Height;
+            btn_Back.Width = btn_Forward.Width = ButtonNaviWidth;
+
+            btn_Back.Left = 0;
+            btn_Back.Width = ButtonNaviWidth;
+
+            btn_Forward.Left = this.Width - ButtonNaviWidth;
+            btn_Forward.Width = ButtonNaviWidth;
+
+            btn_Delete.Left = btn_Back.Width;
+            btn_Delete.Width = this.Width - 2 * ButtonNaviWidth;
+        }
+
+        private int GetFormHeight(bool extended)
+        {            
+            if (extended)
+            {
+                return lb_word.Height + 
+                    lb_translate.Height + 
+                    3 * border_size + 
+                    txtTranslate.Height + 
+                    txtWord.Height + 
+                    btnAddToDictonary.Height + 
+                    btn_Delete.Height;
+            }
+
+            return lb_word.Height + lb_translate.Height + 3 * border_size;
         }
 
         private void AlignTextOnForm()
         {
-            const int border_size = 10;
+
+            this.Height = GetFormHeight(Form_Is_Extended);
+
+            lb_word.Top = border_size;
+            lb_translate.Top = lb_word.Height + lb_word.Top + border_size;
 
 
-            this.Height = this.lb_text.Height + this.lb_text_translate.Height + 3 * border_size;
-
-            this.lb_text.Top = border_size;
-            this.lb_text_translate.Top = this.lb_text.Height + this.lb_text.Top + border_size;
-
-
-            int freespace_first_word = this.Width - this.lb_text.Width;
+            int freespace_first_word = this.Width - lb_word.Width;
             if (freespace_first_word > 0)
             {
-                this.lb_text.Left = freespace_first_word / 2;
+                lb_word.Left = freespace_first_word / 2;
             }
             else
             {
-                this.lb_text.Left = 0;
+                lb_word.Left = 0;
             }
            
 
-
-            int freespace_second_word = this.Width - this.lb_text_translate.Width;
+            int freespace_second_word = this.Width - lb_translate.Width;
             if (freespace_first_word > 0)
             {
-                this.lb_text_translate.Left = freespace_second_word / 2;
+                lb_translate.Left = freespace_second_word / 2;
             }
             else
             {
-                this.lb_text_translate.Left = 0;
+                lb_translate.Left = 0;
             }
-            
         }
 
         private bool DictonaryLoad(string path)
@@ -213,8 +266,8 @@ namespace LinguaLeoSticker
             bool Ret = false;
 
             if (path != "")
-            {               
-                LocalDictonary = File.ReadAllLines(path,Encoding.GetEncoding(1251));
+            {
+                LocalDictonary = File.ReadAllLines(path, System.Text.Encoding.Default/*Encoding.GetEncoding(1251)*/);
                 DictonarySeqPos = 0;
     
                 Ret = true;
@@ -223,16 +276,30 @@ namespace LinguaLeoSticker
             return Ret;
         }
 
-        private string[] DictonaryGetNextCouple(bool random)
+        private string[] DictonaryGetNextCouple(DictonatyAccess_e mode)
         {
             string[] couple = new string[2];
-            const char separator = ':';
 
-            if (random)
+            if (LocalDictonary.Length == 0 || LocalDictonary == null)
+            {
+                return null;
+            }
+
+            if (mode == DictonatyAccess_e.DictAccess_Random)
             {
                 DictonarySeqPos = new Random().Next(0, LocalDictonary.Count());
             }
-            else
+            else if (mode == DictonatyAccess_e.DictAccess_Prev)
+            {
+                //Todo save random history and restore trace
+
+                --DictonarySeqPos;
+                if (DictonarySeqPos < 0)
+                {
+                    DictonarySeqPos = LocalDictonary.Count() - 1;
+                }
+            }
+            else if (mode == DictonatyAccess_e.DictAccess_Next)
             {
                 ++DictonarySeqPos;
                 if (DictonarySeqPos >= LocalDictonary.Count())
@@ -241,31 +308,88 @@ namespace LinguaLeoSticker
                 }
             }
 
-            string Line = LocalDictonary[DictonarySeqPos];
+            string Line = "";
+
+            try
+            {
+                Line = LocalDictonary[DictonarySeqPos];
+            }
+            catch (Exception e)
+            {
+                DictonarySeqPos = 0;
+                Line = LocalDictonary[DictonarySeqPos];
+            }
 
 
             int pos = Line.IndexOf(separator);
             if (pos != -1)
             {
-
                 couple[0] = Line.Substring(0, pos);
                 couple[1] = Line.Substring(pos + 1);
-
             }
 
             return couple;
+        }
+
+        private bool RemoveWordFromDictonary(string Item)
+        {
+            var list = new List<string>(LocalDictonary);
+            list.Remove(Item);
+            LocalDictonary = list.ToArray();
+
+            return true;
+        }
+
+        private bool AddWordToDictonary(string Word, string Translate)
+        {
+            if (Word == "")
+            {
+                return false;
+            }
+
+            if (Translate == "")
+            {
+                return false;
+            }
+
+            string line = String.Format("{0}{1}{2}", Word, separator, Translate);
+
+            if (LocalDictonary != null)
+            {
+                Array.Resize(ref LocalDictonary, LocalDictonary.Length + 1);
+                LocalDictonary[LocalDictonary.Length - 1] = line;               
+            }
+
+            return true;
+        }
+
+        private bool SaveDictonary(string path)
+        {
+            if (LocalDictonary != null)
+            {
+                File.WriteAllLines(path, LocalDictonary, System.Text.Encoding.UTF8);
+            }
+
+            return true;
+        }
+
+        private void DisplayCouple(string Word, string Translate)
+        {
+            lb_word.Text = Word;
+            lb_translate.Text = Translate;
+            
+            AlignTextOnForm();   
         }
 
         private void tmrChangeWord_Tick(object sender, EventArgs e)
         {
             if ((step_display++ & 1) == 0)
             {
-                current_couple = DictonaryGetNextCouple(false);
+                current_couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Next);
                 
                 if (current_couple != null)
                 {
-                    this.lb_text.Text = current_couple[0];
-                    this.lb_text_translate.Text = "";
+                    DisplayCouple(current_couple[0], "");
                     tmrChangeWord.Interval = TimerFirstWord;
                 }
             }
@@ -273,12 +397,10 @@ namespace LinguaLeoSticker
             {
                 if (current_couple != null)
                 {
-                    this.lb_text_translate.Text = current_couple[1];
+                    DisplayCouple(current_couple[0], current_couple[1]);
                     tmrChangeWord.Interval = TimerSecondWord;
                 }
-            }
-
-            AlignTextOnForm();            
+            }         
         }
 
         void StartShow()
@@ -287,9 +409,101 @@ namespace LinguaLeoSticker
             tmrChangeWord.Enabled = true;
         }
 
+        void StopShow()
+        {
+            tmrChangeWord.Enabled = false;
+        }
+
         private void frmSticker_FormClosing(object sender, FormClosingEventArgs e)
         {
             AppConf.saveConfig();   
+        }
+
+        private void frmSticker_DoubleClick(object sender, EventArgs e)
+        {
+            Form_Is_Extended = !Form_Is_Extended;
+            AlignTextOnForm();
+
+            if (Form_Is_Extended)
+            {
+                StopShow();
+                string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Current);
+                if (couple != null)
+                {
+                    DisplayCouple(couple[0], couple[1]);
+                }
+            }
+            else
+            {
+                StartShow();
+            }
+        }
+
+        private void AddToDictonary()
+        {
+            if (!AddWordToDictonary(txtWord.Text, txtTranslate.Text))
+            {
+                MessageBox.Show("Cant add word to dictonary");
+            }
+            else
+            {
+                Form_Is_Extended = false;
+                StartShow();
+                AlignTextOnForm();
+                SaveDictonary(Path.Combine(Application.StartupPath, DictonatyPath));
+            }
+        }
+
+        private void btnAddToDictonary_Click(object sender, EventArgs e)
+        {
+            AddToDictonary();           
+        }
+
+        private void txtTranslate_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                AddToDictonary();
+            }
+        }
+
+        private void btn_Forward_Click(object sender, EventArgs e)
+        {
+            string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Next);
+            if (couple != null)
+            {
+                DisplayCouple(couple[0], couple[1]);
+            }
+        }
+
+        private void btn_Back_Click(object sender, EventArgs e)
+        {
+            string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Prev);
+            if (couple != null)
+            {
+                DisplayCouple(couple[0], couple[1]);
+            }
+        }
+
+        private void btn_Delete_Click(object sender, EventArgs e)
+        {
+            string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Current);
+            if (couple != null)
+            {
+                string item = string.Format("{0}{1}{2}", couple[0], separator, couple[1]);
+                RemoveWordFromDictonary(item);
+                SaveDictonary(Path.Combine(Application.StartupPath, DictonatyPath));
+            }
+
+            couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Current);
+            if (couple != null)
+            {
+                DisplayCouple(couple[0], couple[1]);
+            }
+            else
+            {
+                DisplayCouple("Dictonary", "Is empty");
+            }
         }
 
     }
