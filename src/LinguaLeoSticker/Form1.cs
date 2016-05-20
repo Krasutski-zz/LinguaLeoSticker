@@ -40,6 +40,9 @@ namespace LinguaLeoSticker
         const int ButtonNaviWidth = 50;
 
 
+        static Keys PrevKey;
+
+
         GlobalKeyboardHook hk = new GlobalKeyboardHook();
 
         enum DictonatyAccess_e
@@ -83,13 +86,28 @@ namespace LinguaLeoSticker
                 {
                     rkey.DeleteValue(Application.ProductName);
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
-
+                    MessageBox.Show(ex.ToString(),"Error");
                 }
             }
-            
         }
+
+        private bool TextBox_CommonKey_Press(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.F16)
+            {
+                ((TextBox)sender).Text = "";
+                e.Handled = true;
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+
 
         private void MoveForm_DownEvent(MouseEventArgs e)
         {
@@ -221,11 +239,13 @@ namespace LinguaLeoSticker
             hk.key_hook_evt += key_hook;
         }
 
-        static Keys PrevKey;
-
         public void key_hook(Keys key)
         {
             if ((key == Keys.X) && (PrevKey == Keys.LMenu))
+            {
+                ExtendColapseForm();
+            }
+            else if (key == Keys.Escape && Form_Is_Extended)
             {
                 ExtendColapseForm();
             }
@@ -489,9 +509,12 @@ namespace LinguaLeoSticker
 
         private void txtTranslate_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == (char)Keys.Enter)
+            if (!TextBox_CommonKey_Press(sender, e))
             {
-                AddToDictonary();
+                if (e.KeyChar == (char)Keys.Enter)
+                {
+                    AddToDictonary();
+                }
             }
         }
 
@@ -532,6 +555,11 @@ namespace LinguaLeoSticker
             {
                 DisplayCouple("Dictonary", "Is empty");
             }
+        }
+
+        private void txtWord_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TextBox_CommonKey_Press(sender, e);            
         }
 
     }

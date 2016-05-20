@@ -77,6 +77,7 @@
             this.txtWord.Name = "txtWord";
             this.txtWord.Size = new System.Drawing.Size(100, 20);
             this.txtWord.TabIndex = 2;
+            this.txtWord.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtWord_KeyPress);
             // 
             // txtTranslate
             // 
