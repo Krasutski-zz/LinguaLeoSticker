@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
 [assembly: AssemblyTitle("LinguaLeoSticker")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Learning english")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Denis Krasutski (dkrasutski@gmail.com)")]
 [assembly: AssemblyProduct("LinguaLeoSticker")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]

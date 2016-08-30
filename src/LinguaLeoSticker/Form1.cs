@@ -7,37 +7,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ConfigFile;
 using System.IO;
 using Microsoft.Win32;
 
+using ConfigFile;
 using KeyboardHook;
+using DictonaryManager;
 
 namespace LinguaLeoSticker
 {
     public partial class frmSticker : Form
     {
-        Config AppConf = null;
+        private Config AppConf = null;
 
         private Point mouseOffset;
         private bool isMouseDown = false;
 
         private int TimerFirstWord = 1000;
         private int TimerSecondWord = 1000;
-        private string DictonatyPath = "";
-
-        private string[] LocalDictonary = null;
-        private int DictonarySeqPos = 0;
 
         private int step_display = 0;
         private string[] current_couple = null;
 
         private bool Form_Is_Extended = false;
 
-        const char separator = ':';
         const int border_size = 10;
 
         const int ButtonNaviWidth = 50;
+
+        private DictMng Dict = new DictMng();
 
 
         static Keys PrevKey;
@@ -45,13 +43,6 @@ namespace LinguaLeoSticker
 
         GlobalKeyboardHook hk = new GlobalKeyboardHook();
 
-        enum DictonatyAccess_e
-        {
-            DictAccess_Next,
-            DictAccess_Prev,
-            DictAccess_Current,
-            DictAccess_Random
-        };
 
 
         public frmSticker()
@@ -72,8 +63,7 @@ namespace LinguaLeoSticker
             lb_translate.Font = AppConf.TextTranslateFont;
             this.TimerFirstWord = AppConf.TimeText;
             this.TimerSecondWord = AppConf.TimeTextTranslate;
-            this.DictonatyPath = AppConf.DictonaryPath;
-
+           
             RegistryKey rkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
             if (AppConf.AutoLoad)
@@ -194,10 +184,10 @@ namespace LinguaLeoSticker
 
         private void frmSticker_Load(object sender, EventArgs e)
         {
-            ///try open dictonery
-            if (DictonaryLoad(Path.Combine(Application.StartupPath,DictonatyPath)) == true)
+            ///try open dictonary
+            if(Dict.Open(Path.Combine(Application.StartupPath,AppConf.DictonaryPath)))
             {
-                lb_translate.Text = DictonatyPath;
+                //lb_translate.Text = DictonatyPath;
                 StartShow();
             }
             else
@@ -300,117 +290,6 @@ namespace LinguaLeoSticker
             }
         }
 
-        private bool DictonaryLoad(string path)
-        {
-            bool Ret = false;
-
-            if (path != "")
-            {
-                LocalDictonary = File.ReadAllLines(path, System.Text.Encoding.Default/*Encoding.GetEncoding(1251)*/);
-                DictonarySeqPos = 0;
-    
-                Ret = true;
-            }
-
-            return Ret;
-        }
-
-        private string[] DictonaryGetNextCouple(DictonatyAccess_e mode)
-        {
-            string[] couple = new string[2];
-
-            if (LocalDictonary.Length == 0 || LocalDictonary == null)
-            {
-                return null;
-            }
-
-            if (mode == DictonatyAccess_e.DictAccess_Random)
-            {
-                DictonarySeqPos = new Random().Next(0, LocalDictonary.Count());
-            }
-            else if (mode == DictonatyAccess_e.DictAccess_Prev)
-            {
-                //Todo save random history and restore trace
-
-                --DictonarySeqPos;
-                if (DictonarySeqPos < 0)
-                {
-                    DictonarySeqPos = LocalDictonary.Count() - 1;
-                }
-            }
-            else if (mode == DictonatyAccess_e.DictAccess_Next)
-            {
-                ++DictonarySeqPos;
-                if (DictonarySeqPos >= LocalDictonary.Count())
-                {
-                    DictonarySeqPos = 0;
-                }
-            }
-
-            string Line = "";
-
-            try
-            {
-                Line = LocalDictonary[DictonarySeqPos];
-            }
-            catch (Exception e)
-            {
-                DictonarySeqPos = 0;
-                Line = LocalDictonary[DictonarySeqPos];
-            }
-
-
-            int pos = Line.IndexOf(separator);
-            if (pos != -1)
-            {
-                couple[0] = Line.Substring(0, pos);
-                couple[1] = Line.Substring(pos + 1);
-            }
-
-            return couple;
-        }
-
-        private bool RemoveWordFromDictonary(string Item)
-        {
-            var list = new List<string>(LocalDictonary);
-            list.Remove(Item);
-            LocalDictonary = list.ToArray();
-
-            return true;
-        }
-
-        private bool AddWordToDictonary(string Word, string Translate)
-        {
-            if (Word == "")
-            {
-                return false;
-            }
-
-            if (Translate == "")
-            {
-                return false;
-            }
-
-            string line = String.Format("{0}{1}{2}", Word, separator, Translate);
-
-            if (LocalDictonary != null)
-            {
-                Array.Resize(ref LocalDictonary, LocalDictonary.Length + 1);
-                LocalDictonary[LocalDictonary.Length - 1] = line;               
-            }
-
-            return true;
-        }
-
-        private bool SaveDictonary(string path)
-        {
-            if (LocalDictonary != null)
-            {
-                File.WriteAllLines(path, LocalDictonary, System.Text.Encoding.UTF8);
-            }
-
-            return true;
-        }
 
         private void DisplayCouple(string Word, string Translate)
         {
@@ -424,7 +303,7 @@ namespace LinguaLeoSticker
         {
             if ((step_display++ & 1) == 0)
             {
-                current_couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Next);
+                current_couple = Dict.GetNextCouple();
                 
                 if (current_couple != null)
                 {
@@ -466,7 +345,7 @@ namespace LinguaLeoSticker
             if (Form_Is_Extended)
             {
                 StopShow();
-                string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Current);
+                string[] couple = Dict.GetCurrentCouple();
                 if (couple != null)
                 {
                     DisplayCouple(couple[0], couple[1]);
@@ -489,7 +368,7 @@ namespace LinguaLeoSticker
 
         private void AddToDictonary()
         {
-            if (!AddWordToDictonary(txtWord.Text, txtTranslate.Text))
+            if (!Dict.AddWord(txtWord.Text, txtTranslate.Text))
             {
                 MessageBox.Show("Cant add word to dictonary");
             }
@@ -498,7 +377,7 @@ namespace LinguaLeoSticker
                 Form_Is_Extended = false;
                 StartShow();
                 AlignTextOnForm();
-                SaveDictonary(Path.Combine(Application.StartupPath, DictonatyPath));
+                Dict.Save(Path.Combine(Application.StartupPath, AppConf.DictonaryPath));
             }
         }
 
@@ -520,7 +399,7 @@ namespace LinguaLeoSticker
 
         private void btn_Forward_Click(object sender, EventArgs e)
         {
-            string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Next);
+            string[] couple = Dict.GetNextCouple();
             if (couple != null)
             {
                 DisplayCouple(couple[0], couple[1]);
@@ -529,7 +408,7 @@ namespace LinguaLeoSticker
 
         private void btn_Back_Click(object sender, EventArgs e)
         {
-            string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Prev);
+            string[] couple = Dict.GetPrevCouple() ;
             if (couple != null)
             {
                 DisplayCouple(couple[0], couple[1]);
@@ -538,15 +417,14 @@ namespace LinguaLeoSticker
 
         private void btn_Delete_Click(object sender, EventArgs e)
         {
-            string[] couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Current);
+            string[] couple = Dict.GetCurrentCouple();
             if (couple != null)
             {
-                string item = string.Format("{0}{1}{2}", couple[0], separator, couple[1]);
-                RemoveWordFromDictonary(item);
-                SaveDictonary(Path.Combine(Application.StartupPath, DictonatyPath));
+                Dict.RemoveWord(couple);
+                Dict.Save(Path.Combine(Application.StartupPath, AppConf.DictonaryPath));
             }
 
-            couple = DictonaryGetNextCouple(DictonatyAccess_e.DictAccess_Current);
+            couple = Dict.GetCurrentCouple();
             if (couple != null)
             {
                 DisplayCouple(couple[0], couple[1]);
