@@ -339,6 +339,7 @@ namespace LinguaLeoSticker
 
         private void ExtendColapseForm()
         {
+
             Form_Is_Extended = !Form_Is_Extended;
             AlignTextOnForm();
 
@@ -354,6 +355,17 @@ namespace LinguaLeoSticker
                 txtWord.Text = "";
                 txtTranslate.Text = "";
                 txtWord.Focus();
+
+                if (Top < 0)
+                {
+                    Top = 0;
+                }
+
+                int ScreenWidth = Screen.FromControl(this).Bounds.Width;
+                if (Left > ScreenWidth - Width)
+                {
+                    Left = ScreenWidth - Width;
+                }
             }
             else
             {
