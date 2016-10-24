@@ -37,6 +37,7 @@ namespace LinguaLeoSticker
 
         private DictMng Dict = new DictMng();
 
+        private bool isDoubleEnterInTxtWord = false;
 
         static Keys PrevKey;
 
@@ -231,7 +232,7 @@ namespace LinguaLeoSticker
 
         public void key_hook(Keys key)
         {
-            if ((key == Keys.X) && (PrevKey == Keys.LMenu))
+            if ((key == Keys.D) && (PrevKey == Keys.LMenu))
             {
                 ExtendColapseForm();
             }
@@ -354,6 +355,7 @@ namespace LinguaLeoSticker
 
                 txtWord.Text = "";
                 txtTranslate.Text = "";
+                txtWord.Select();
                 txtWord.Focus();
 
                 if (Top < 0)
@@ -449,8 +451,28 @@ namespace LinguaLeoSticker
 
         private void txtWord_KeyPress(object sender, KeyPressEventArgs e)
         {
-            TextBox_CommonKey_Press(sender, e);            
-        }
+            TextBox_CommonKey_Press(sender, e);
 
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                if (isDoubleEnterInTxtWord)
+                {
+                    isDoubleEnterInTxtWord = false;
+
+                    AddToDictonary();
+                    return;
+                }
+
+                LinguaLeoAPI llApi = new LinguaLeoAPI();
+
+                txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
+
+                isDoubleEnterInTxtWord = true;
+            }
+            else
+            {
+                isDoubleEnterInTxtWord = false;
+            }
+        }
     }
 }
