@@ -453,7 +453,6 @@ namespace LinguaLeoSticker
         {
             TextBox_CommonKey_Press(sender, e);
 
-
             if (e.KeyChar == (char) Keys.Enter)
             {
                 if (isDoubleEnterInTxtWord)
@@ -473,8 +472,11 @@ namespace LinguaLeoSticker
 
             if ((e.KeyChar == (char)Keys.Enter) || (e.KeyChar == (char)crt_v))
             {
-                LinguaLeoAPI llApi = new LinguaLeoAPI();
-                txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
+                if (txtWord.Text != "")
+                {
+                    LinguaLeoAPI llApi = new LinguaLeoAPI();
+                    txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
+                }
             }
         }
     }
