@@ -453,25 +453,28 @@ namespace LinguaLeoSticker
         {
             TextBox_CommonKey_Press(sender, e);
 
-            if (e.KeyChar == (char)Keys.Enter)
+
+            if (e.KeyChar == (char) Keys.Enter)
             {
                 if (isDoubleEnterInTxtWord)
                 {
-                    isDoubleEnterInTxtWord = false;
-
                     AddToDictonary();
                     return;
                 }
-
-                LinguaLeoAPI llApi = new LinguaLeoAPI();
-
-                txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
 
                 isDoubleEnterInTxtWord = true;
             }
             else
             {
                 isDoubleEnterInTxtWord = false;
+            }
+
+            Keys crt_v = Keys.Capital | Keys.RButton;
+
+            if ((e.KeyChar == (char)Keys.Enter) || (e.KeyChar == (char)crt_v))
+            {
+                LinguaLeoAPI llApi = new LinguaLeoAPI();
+                txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
             }
         }
     }
