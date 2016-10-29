@@ -25,7 +25,8 @@ namespace ConfigFile
         public string TextFont;
         public string TextTranslateFont;
         public bool AutoLoad;
-   
+        public string LinguaLeoUser;
+        public string LinguaLeoPassword;
     }
 
     class Config
@@ -45,6 +46,9 @@ namespace ConfigFile
         public Font TextFont { get; set; }
         public Font TextTranslateFont { get; set; }
         public bool AutoLoad { get; set; }
+        public string LinguaLeoUser { get; set; }
+        public string LinguaLeoPassword { get; set; }
+
 
 
         [XmlElement("BackgroundColor")]
@@ -93,12 +97,14 @@ namespace ConfigFile
             BackgroundColor = Color.Yellow;
             TextColor = Color.Black;
             TextTranslateColor = Color.Black;
-            TimeText = 2000;
+            TimeText = 3000;
             TimeTextTranslate = 2000;
             DictonaryPath = "default.txt";
             TextFont = new Font(new FontFamily("Arial"), 20, FontStyle.Regular, GraphicsUnit.Pixel);
             TextTranslateFont = new Font(new FontFamily("Arial"), 18, FontStyle.Regular, GraphicsUnit.Pixel);
             AutoLoad = true;
+            LinguaLeoUser = "email";
+            LinguaLeoPassword = "password";
 
             try
             {
@@ -121,7 +127,9 @@ namespace ConfigFile
                 DictonaryPath = config.DictonaryPath;
                 TextFontConvert = config.TextFont;
                 TextTranslateFontConvert = config.TextTranslateFont;
-                AutoLoad = config.AutoLoad;      
+                AutoLoad = config.AutoLoad;
+                LinguaLeoUser = config.LinguaLeoUser;
+                LinguaLeoPassword = config.LinguaLeoPassword;
             }
             catch (Exception ext)
             {
@@ -151,7 +159,9 @@ namespace ConfigFile
                 config.DictonaryPath = DictonaryPath;
                 config.TextFont = TextFontConvert;
                 config.TextTranslateFont = TextTranslateFontConvert;
-                config.AutoLoad = AutoLoad;   
+                config.AutoLoad = AutoLoad;
+                config.LinguaLeoUser = LinguaLeoUser;
+                config.LinguaLeoPassword = LinguaLeoPassword;
 
                 XmlSerializer ser = new XmlSerializer(typeof(ParamList));
                 StreamWriter writer = new StreamWriter(FileName);

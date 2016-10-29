@@ -181,7 +181,7 @@ namespace LinguaLeoSticker
         private void frmSticker_Load(object sender, EventArgs e)
         {
             ///try open dictonary
-            if(Dict.Open(Path.Combine(Application.StartupPath,AppConf.DictonaryPath)))
+            if (Dict.Open(Path.Combine(Application.StartupPath, AppConf.DictonaryPath)))
             {
                 //lb_translate.Text = DictonatyPath;
                 StartShow();
@@ -189,11 +189,33 @@ namespace LinguaLeoSticker
             else
             {
                 lb_translate.Text = "Can\'t open dictonary file!";
+
+                LinguaLeoAPI llApi = new LinguaLeoAPI();
+
+                try
+                {
+                    llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+                    string[] ll_dict;
+                    llApi.GetUserDict(out ll_dict);
+
+                    if (ll_dict.Length > 0)
+                    {
+                        Dict.Open(ll_dict);
+
+                        //create dictonary file
+                        Dict.Save(Path.Combine(Application.StartupPath, AppConf.DictonaryPath));
+                        StartShow();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
 
             this.Top = AppConf.Y;
             this.Left = AppConf.X;
-               
+
             AlignTextOnForm();
 
             /* Add align text boxses */

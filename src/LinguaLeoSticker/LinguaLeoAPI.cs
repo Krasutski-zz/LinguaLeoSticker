@@ -95,10 +95,10 @@ namespace LinguaLeoSticker
             }
         }
 
-        public void GetUserDict(out string user_dict)
+        public void GetUserDict(out string[] user_dict)
         {
             //debug todo del
-            if (false)
+            if (true)
             {
                 GetUserDictImpl1(out user_dict);
             }
@@ -109,12 +109,11 @@ namespace LinguaLeoSticker
 
         }
 
-        private void GetUserDictImpl1(out string user_dict)
+        private void GetUserDictImpl1(out string[] user_dict)
         {
             string response = "";
-            user_dict = "";
-
-            StringBuilder sb = new StringBuilder();
+            user_dict = null;
+            List<string> dict = new List<string>();
 
             //return only 400 word, sorted by Id, research:param
             if (WriteHttpRequest(api_url + "userdict", out response, ref _cookie))
@@ -133,26 +132,27 @@ namespace LinguaLeoSticker
                         string word = api_response.words[i].word_value;
                         string tword = api_response.words[i].translate_value;
 
-                        sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
+                        dict.Add(string.Format("{0}:{1}", word.ToLower(), tword.ToLower()));
                     }
 
-                    user_dict = sb.ToString();
                 }
+
+                user_dict = dict.ToArray();
             }
         }
     
 
-        private void GetUserDictImpl2(out string user_dict)
+        private void GetUserDictImpl2(out string[] user_dict)
         {
             string response = "";
-            user_dict = "";
+            user_dict = null;
 
-            StringBuilder sb = new StringBuilder();
+            List<string> list_dict = new List<string>();
 
             //new words
             //string url = "http://lingualeo.com/ru/userdict/json?sortBy=date&wordType=1&filter=no_translate&page=1&groupId=dictionary";
-            //all words
-            string url = "http://lingualeo.com/ru/userdict/json";
+            //100 words on page
+            string url = "http://lingualeo.com/ru/userdict/json?sortBy=date&filter=all&page=2";
 
             if (WriteHttpRequest(url, out response, ref _cookie))
             {
@@ -178,7 +178,7 @@ namespace LinguaLeoSticker
                                 string word = dict.words[j].word_value;
                                 string tword = dict.words[j].user_translates[0].translate_value;
 
-                                sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
+                                list_dict.Add(string.Format("{0}:{1}", word.ToLower(), tword.ToLower()));
                             }
                             catch (Exception ex)
                             {
@@ -187,7 +187,7 @@ namespace LinguaLeoSticker
                         }
                     }
 
-                    user_dict = sb.ToString();
+                    user_dict = list_dict.ToArray();
                 }
             }
         }

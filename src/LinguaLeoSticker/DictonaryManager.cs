@@ -30,7 +30,6 @@ namespace DictonaryManager
                 return null;
             }
 
-
             string[] couple = new string[2];
 
             int pos = Line.IndexOf(separator);
@@ -44,10 +43,8 @@ namespace DictonaryManager
                 return null;
             }
 
-
             return couple;
         }
-
 
         public bool Open(string Path)
         {
@@ -55,13 +52,26 @@ namespace DictonaryManager
 
             if (Path != "")
             {
-                Data = File.ReadAllLines(Path, System.Text.Encoding.Default/*Encoding.GetEncoding(1251)*/);
-                DictonaryLine = 0;
+                try
+                {
+                    Data = File.ReadAllLines(Path, System.Text.Encoding.Default/*Encoding.GetEncoding(1251)*/);
+                    DictonaryLine = 0;
 
-                Ret = true;
+                    Ret = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
 
             return Ret;
+        }
+
+        public void Open(string[] Dict)
+        {
+            Data = Dict;
+            DictonaryLine = 0;
         }
 
         public string[] GetRandomCouple()
@@ -90,7 +100,6 @@ namespace DictonaryManager
             
             return LineToText(DictonaryLine);
         }
-
 
         public string[] GetNextCouple()
         {
@@ -126,7 +135,6 @@ namespace DictonaryManager
             return LineToText(DictonaryLine);
         }
 
-
         public bool RemoveWord(string[] couple)
         {
             var list = new List<string>(Data);
@@ -135,7 +143,6 @@ namespace DictonaryManager
 
             return true;
         }
-
 
         public bool AddWord(string Word, string Translate)
         {
@@ -159,7 +166,6 @@ namespace DictonaryManager
 
             return true;
         }
-
 
         public bool Save(string Path)
         {
