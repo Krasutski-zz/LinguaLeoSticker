@@ -12,18 +12,20 @@ namespace LinguaLeoSticker
 {
     class LinguaLeoAPI
     {
-        const string api_url = "http://api.lingualeo.com/";
+        private CookieContainer _cookie = new CookieContainer();
+        private const string api_url = "http://api.lingualeo.com/";
 
-        public string GetTranslate(string word)
-        {     
+        private bool WriteHttpRequest(string url, out string http_response, ref CookieContainer cookie)
+        {
+            http_response = "";
 
             StringBuilder sb = new StringBuilder();
 
             byte[] buf = new byte[8192];
 
             HttpWebRequest request = (HttpWebRequest)
-            WebRequest.Create(api_url + "gettranslates?word=" + word);
-
+            WebRequest.Create(url);
+            request.CookieContainer = cookie;
             try
             {
 
@@ -50,15 +52,103 @@ namespace LinguaLeoSticker
                         sb.Append(tempString);
                     }
                 } while (count > 0);
+                
+                http_response = sb.ToString();
 
-                dynamic api_response = JsonConvert.DeserializeObject(sb.ToString());
-
-                return api_response.translate[0].value;
+                return true;
             }
             catch (Exception ex)
             {
-                return "Not found translate!";
+                Console.WriteLine(ex.ToString());                
+                return false;
             }
+        }
+
+        public bool Auth(string email, string password, out string error_msg)
+        {
+            string response = "";
+            error_msg = "";
+
+
+            if (WriteHttpRequest(api_url + string.Format("api/login?email={0}&password={1}", email, password), out response, ref _cookie) == true)
+            {
+
+                dynamic api_response = JsonConvert.DeserializeObject(response);
+                
+                try
+                {
+                    error_msg = api_response.error_msg;
+                    if (error_msg == "")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+
+            return false;
+        }
+
+        public bool AddWord(string word, string tword, string context, out string error_msg)
+        {
+            string response = "";
+            error_msg = "";
+
+
+            string url_parsams = string.Format("api/addword?word={0}&tword={1}&context={2}", word, tword, context);
+            if (WriteHttpRequest(api_url + url_parsams, out response, ref _cookie))
+            {
+                dynamic api_response = JsonConvert.DeserializeObject(response);
+
+                if (api_response.error_msg != "")                
+                {
+                    error_msg = api_response.error_msg;
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public string GetTranslate(string word)
+        {
+            const string error_msg = "Error, cant get translation!";
+            string response = "";
+
+            if (WriteHttpRequest(api_url + "gettranslates?word=" + word, out response, ref _cookie) == true)
+            {
+                try
+                {
+
+
+                    dynamic api_response = JsonConvert.DeserializeObject(response);
+
+                    if (api_response.error_msg == "")
+                    {
+                        return api_response.translate[0].value;
+                    }
+                    else
+                    {
+                        return api_response.error_msg;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    return error_msg;
+                }
+            }
+
+            return error_msg;
         }
 
     }
