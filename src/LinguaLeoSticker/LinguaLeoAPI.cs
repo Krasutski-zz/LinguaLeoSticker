@@ -12,6 +12,7 @@ namespace LinguaLeoSticker
 {
     class LinguaLeoAPI
     {
+        private bool _is_auth = false;
         private CookieContainer _cookie = new CookieContainer();
         private const string api_url = "http://api.lingualeo.com/";
 
@@ -52,68 +53,65 @@ namespace LinguaLeoSticker
                         sb.Append(tempString);
                     }
                 } while (count > 0);
-                
+
                 http_response = sb.ToString();
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());                
+                Console.WriteLine(ex.ToString());
                 return false;
             }
         }
 
-        public bool Auth(string email, string password, out string error_msg)
+        public void Auth(string email, string password)
         {
             string response = "";
-            error_msg = "";
-
 
             if (WriteHttpRequest(api_url + string.Format("api/login?email={0}&password={1}", email, password), out response, ref _cookie) == true)
             {
-
-                dynamic api_response = JsonConvert.DeserializeObject(response);
-                
+                string error_msg = "";
                 try
                 {
+                    dynamic api_response = JsonConvert.DeserializeObject(response);
                     error_msg = api_response.error_msg;
-                    if (error_msg == "")
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }
+                finally
+                {
+                    if (error_msg != "")
+                    {
+                        throw new System.ArgumentException(error_msg);
+                    }
+                    else
+                    {
+                        _is_auth = true;
+                    }
+                }
             }
-
-            return false;
         }
 
-        public bool GetUserDict(out string user_dict, out string error_msg)
+        public void GetUserDict(out string user_dict)
         {
             //debug todo del
             if (false)
             {
-                return GetUserDictImpl1(out user_dict, out error_msg);
+                GetUserDictImpl1(out user_dict);
             }
             else
             {
-                return GetUserDictImpl2(out user_dict, out error_msg);
+                GetUserDictImpl2(out user_dict);
             }
 
         }
 
-        private bool GetUserDictImpl1(out string user_dict, out string error_msg)
+        private void GetUserDictImpl1(out string user_dict)
         {
             string response = "";
-            error_msg = "";
             user_dict = "";
 
             StringBuilder sb = new StringBuilder();
@@ -123,35 +121,30 @@ namespace LinguaLeoSticker
             {
                 dynamic api_response = JsonConvert.DeserializeObject(response);
 
-                if (api_response.error_msg != "")
+                string error_msg = api_response.error_msg;
+                if (error_msg != "")
                 {
-                    error_msg = api_response.error_msg;
-                    return false;
+                    throw new System.ArgumentException(error_msg);
                 }
-
-
-                for (int i = 0; i < api_response.words.Count; i++)
+                else
                 {
-                    string word = api_response.words[i].word_value;
-                    string tword = api_response.words[i].translate_value;
+                    for (int i = 0; i < api_response.words.Count; i++)
+                    {
+                        string word = api_response.words[i].word_value;
+                        string tword = api_response.words[i].translate_value;
 
-                    sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
+                        sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
+                    }
+
+                    user_dict = sb.ToString();
                 }
-
-                user_dict = sb.ToString();
-
-
-                return true;
             }
-
-
-            return false;
         }
+    
 
-        private bool GetUserDictImpl2(out string user_dict, out string error_msg)
+        private void GetUserDictImpl2(out string user_dict)
         {
             string response = "";
-            error_msg = "";
             user_dict = "";
 
             StringBuilder sb = new StringBuilder();
@@ -167,46 +160,41 @@ namespace LinguaLeoSticker
 
                 if (api_response.error_msg != "")
                 {
-                    error_msg = api_response.error_msg;
-                    return false;
+                    string error_msg = api_response.error_msg;
+
+                    throw new System.ArgumentException(error_msg);
                 }
-
-
-                for (int i = 0; i < api_response.userdict3.Count; i++)
+                else
                 {
-                    var dict = api_response.userdict3[i];
 
-                    for (int j = 0; j < (int)dict.count; j++)
+                    for (int i = 0; i < api_response.userdict3.Count; i++)
                     {
-                        try
-                        {
-                            string word = dict.words[j].word_value;
-                            string tword = dict.words[j].user_translates[0].translate_value;
+                        var dict = api_response.userdict3[i];
 
-                            sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
-                        }
-                        catch (Exception ex)
+                        for (int j = 0; j < (int)dict.count; j++)
                         {
-                            Console.WriteLine(ex.ToString());
+                            try
+                            {
+                                string word = dict.words[j].word_value;
+                                string tword = dict.words[j].user_translates[0].translate_value;
+
+                                sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.ToString());
+                            }
                         }
                     }
+
+                    user_dict = sb.ToString();
                 }
-
-                user_dict = sb.ToString();
-
-
-                return true;
             }
-
-
-            return false;
         }
 
-        public bool AddWord(string word, string tword, string context, out string error_msg)
+        public void AddWord(string word, string tword, string context)
         {
             string response = "";
-            error_msg = "";
-
 
             string url_parsams = string.Format("api/addword?word={0}&tword={1}&context={2}", word, tword, context);
             if (WriteHttpRequest(api_url + url_parsams, out response, ref _cookie))
@@ -215,14 +203,10 @@ namespace LinguaLeoSticker
 
                 if (api_response.error_msg != "")                
                 {
-                    error_msg = api_response.error_msg;
-                    return false;
+                    string error_msg = api_response.error_msg;
+                    throw new System.ArgumentException(error_msg);                    
                 }
-
-                return true;
             }
-
-            return false;
         }
 
         public string GetTranslate(string word)
@@ -255,6 +239,11 @@ namespace LinguaLeoSticker
             }
 
             return error_msg;
+        }
+
+        public bool is_Auth()
+        {
+            return _is_auth;
         }
 
     }
