@@ -96,6 +96,112 @@ namespace LinguaLeoSticker
             return false;
         }
 
+        public bool GetUserDict(out string user_dict, out string error_msg)
+        {
+            //debug todo del
+            if (false)
+            {
+                return GetUserDictImpl1(out user_dict, out error_msg);
+            }
+            else
+            {
+                return GetUserDictImpl2(out user_dict, out error_msg);
+            }
+
+        }
+
+        private bool GetUserDictImpl1(out string user_dict, out string error_msg)
+        {
+            string response = "";
+            error_msg = "";
+            user_dict = "";
+
+            StringBuilder sb = new StringBuilder();
+
+            //return only 400 word, sorted by Id, research:param
+            if (WriteHttpRequest(api_url + "userdict", out response, ref _cookie))
+            {
+                dynamic api_response = JsonConvert.DeserializeObject(response);
+
+                if (api_response.error_msg != "")
+                {
+                    error_msg = api_response.error_msg;
+                    return false;
+                }
+
+
+                for (int i = 0; i < api_response.words.Count; i++)
+                {
+                    string word = api_response.words[i].word_value;
+                    string tword = api_response.words[i].translate_value;
+
+                    sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
+                }
+
+                user_dict = sb.ToString();
+
+
+                return true;
+            }
+
+
+            return false;
+        }
+
+        private bool GetUserDictImpl2(out string user_dict, out string error_msg)
+        {
+            string response = "";
+            error_msg = "";
+            user_dict = "";
+
+            StringBuilder sb = new StringBuilder();
+
+            //new words
+            //string url = "http://lingualeo.com/ru/userdict/json?sortBy=date&wordType=1&filter=no_translate&page=1&groupId=dictionary";
+            //all words
+            string url = "http://lingualeo.com/ru/userdict/json";
+
+            if (WriteHttpRequest(url, out response, ref _cookie))
+            {
+                dynamic api_response = JsonConvert.DeserializeObject(response);
+
+                if (api_response.error_msg != "")
+                {
+                    error_msg = api_response.error_msg;
+                    return false;
+                }
+
+
+                for (int i = 0; i < api_response.userdict3.Count; i++)
+                {
+                    var dict = api_response.userdict3[i];
+
+                    for (int j = 0; j < (int)dict.count; j++)
+                    {
+                        try
+                        {
+                            string word = dict.words[j].word_value;
+                            string tword = dict.words[j].user_translates[0].translate_value;
+
+                            sb.Append(string.Format("{0}:{1}\r\n", word.ToLower(), tword.ToLower()));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
+                    }
+                }
+
+                user_dict = sb.ToString();
+
+
+                return true;
+            }
+
+
+            return false;
+        }
+
         public bool AddWord(string word, string tword, string context, out string error_msg)
         {
             string response = "";
