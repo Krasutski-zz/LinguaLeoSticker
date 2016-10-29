@@ -41,6 +41,7 @@ namespace LinguaLeoSticker
 
         static Keys PrevKey;
 
+        LinguaLeoAPI llApi = new LinguaLeoAPI();
 
         GlobalKeyboardHook hk = new GlobalKeyboardHook();
 
@@ -190,11 +191,13 @@ namespace LinguaLeoSticker
             {
                 lb_translate.Text = "Can\'t open dictonary file!";
 
-                LinguaLeoAPI llApi = new LinguaLeoAPI();
-
                 try
                 {
-                    llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+                    if (!llApi.is_Auth())
+                    {
+                        llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+                    }
+
                     string[] ll_dict;
                     llApi.GetUserDict(out ll_dict);
 
@@ -399,6 +402,17 @@ namespace LinguaLeoSticker
 
         private void AddToDictonary()
         {
+
+            if (!llApi.is_Auth())
+            {
+                llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+            }
+
+            if (llApi.is_Auth())
+            {
+                llApi.AddWord(txtWord.Text, txtTranslate.Text,"");
+            }
+
             if (!Dict.AddWord(txtWord.Text, txtTranslate.Text))
             {
                 MessageBox.Show("Cant add word to dictonary");
@@ -491,7 +505,6 @@ namespace LinguaLeoSticker
             {
                 if (txtWord.Text != "")
                 {
-                    LinguaLeoAPI llApi = new LinguaLeoAPI();
                     txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
                 }
             }
