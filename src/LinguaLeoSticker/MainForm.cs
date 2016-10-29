@@ -232,7 +232,7 @@ namespace LinguaLeoSticker
 
         public void key_hook(Keys key)
         {
-            if ((key == Keys.D) && (PrevKey == Keys.LMenu))
+            if ((key == Keys.F) && (PrevKey == Keys.LMenu))
             {
                 ExtendColapseForm();
             }
