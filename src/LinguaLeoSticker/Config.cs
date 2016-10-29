@@ -27,6 +27,7 @@ namespace ConfigFile
         public bool AutoLoad;
         public string LinguaLeoUser;
         public string LinguaLeoPassword;
+        public bool RandomMode;
     }
 
     class Config
@@ -48,7 +49,7 @@ namespace ConfigFile
         public bool AutoLoad { get; set; }
         public string LinguaLeoUser { get; set; }
         public string LinguaLeoPassword { get; set; }
-
+        public bool RandomMode { get; set; }
 
 
         [XmlElement("BackgroundColor")]
@@ -92,7 +93,7 @@ namespace ConfigFile
 
             X = 100;
             Y = 100;
-            Width = 200;
+            Width = 280;
             Height = 100;
             BackgroundColor = Color.Yellow;
             TextColor = Color.Black;
@@ -105,6 +106,7 @@ namespace ConfigFile
             AutoLoad = true;
             LinguaLeoUser = "email";
             LinguaLeoPassword = "password";
+            RandomMode = true;
 
             try
             {
@@ -130,6 +132,7 @@ namespace ConfigFile
                 AutoLoad = config.AutoLoad;
                 LinguaLeoUser = config.LinguaLeoUser;
                 LinguaLeoPassword = config.LinguaLeoPassword;
+                RandomMode = config.RandomMode;
             }
             catch (Exception ext)
             {
@@ -162,6 +165,7 @@ namespace ConfigFile
                 config.AutoLoad = AutoLoad;
                 config.LinguaLeoUser = LinguaLeoUser;
                 config.LinguaLeoPassword = LinguaLeoPassword;
+                config.RandomMode = RandomMode;
 
                 XmlSerializer ser = new XmlSerializer(typeof(ParamList));
                 StreamWriter writer = new StreamWriter(FileName);

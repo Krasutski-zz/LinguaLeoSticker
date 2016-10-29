@@ -156,7 +156,7 @@ namespace DictonaryManager
                 return false;
             }
 
-            string line = String.Format("{0}{1}{2}", Word, separator, Translate);
+            string line = String.Format("{0}{1}{2}", Word.ToLower(), separator, Translate.ToLower());
 
             if (Data != null)
             {

@@ -324,8 +324,14 @@ namespace LinguaLeoSticker
         {
             if ((step_display++ & 1) == 0)
             {
-                current_couple = Dict.GetNextCouple();
-                
+                if (AppConf.RandomMode)
+                {
+                    current_couple = Dict.GetRandomCouple();
+                }
+                else
+                {
+                    current_couple = Dict.GetNextCouple();
+                }
                 if (current_couple != null)
                 {
                     DisplayCouple(current_couple[0], "");
@@ -403,17 +409,27 @@ namespace LinguaLeoSticker
         private void AddToDictonary()
         {
 
+            string tword = txtTranslate.Text.Trim();
+            string word = txtWord.Text.Trim();
+
             if (!llApi.is_Auth())
             {
-                llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+                try
+                {
+                    llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
 
             if (llApi.is_Auth())
             {
-                llApi.AddWord(txtWord.Text, txtTranslate.Text,"");
+                llApi.AddWord(word, tword, "");
             }
 
-            if (!Dict.AddWord(txtWord.Text, txtTranslate.Text))
+            if (!Dict.AddWord(word, tword))
             {
                 MessageBox.Show("Cant add word to dictonary");
             }

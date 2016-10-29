@@ -196,7 +196,7 @@ namespace LinguaLeoSticker
         {
             string response = "";
 
-            string url_parsams = string.Format("api/addword?word={0}&tword={1}&context={2}", word, tword, context);
+            string url_parsams = string.Format("api/addword?word={0}&tword={1}&context={2}", word.ToLower(), tword.ToLower(), context);
             if (WriteHttpRequest(api_url + url_parsams, out response, ref _cookie))
             {
                 dynamic api_response = JsonConvert.DeserializeObject(response);
