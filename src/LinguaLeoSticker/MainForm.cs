@@ -20,7 +20,7 @@ namespace LinguaLeoSticker
     {
         private Config AppConf = null;
 
-        private Point mouseOffset;
+        private Point moveFormStartPoint;
         private bool isMouseDown = false;
 
         private int TimerFirstWord = 1000;
@@ -102,15 +102,9 @@ namespace LinguaLeoSticker
 
         private void MoveForm_DownEvent(MouseEventArgs e)
         {
-            int xOffset;
-            int yOffset;
-
             if (e.Button == MouseButtons.Left)
             {
-                xOffset = -e.X - SystemInformation.FrameBorderSize.Width;
-                yOffset = -e.Y - SystemInformation.CaptionHeight -
-                    SystemInformation.FrameBorderSize.Height;
-                mouseOffset = new Point(xOffset, yOffset);
+                moveFormStartPoint = new Point(Left - Control.MousePosition.X, Top - Control.MousePosition.Y);
                 isMouseDown = true;
             }
         }
@@ -120,7 +114,7 @@ namespace LinguaLeoSticker
             if (isMouseDown)
             {
                 Point mousePos = Control.MousePosition;
-                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                mousePos.Offset(moveFormStartPoint.X, moveFormStartPoint.Y);
                 Location = mousePos;
             }
         }
@@ -133,22 +127,23 @@ namespace LinguaLeoSticker
             {
                 isMouseDown = false;
 
+                //save current position
                 AppConf.Y = this.Top;
                 AppConf.X = this.Left;
             }
         }
 
-        private void lb_text_MouseDown(object sender, MouseEventArgs e)
+        private void lb_word_MouseDown(object sender, MouseEventArgs e)
         {
             MoveForm_DownEvent(e);
         }
 
-        private void lb_text_MouseUp(object sender, MouseEventArgs e)
+        private void lb_word_MouseUp(object sender, MouseEventArgs e)
         {
             MoveForm_UpEvent(e);
         }
 
-        private void lb_text_MouseMove(object sender, MouseEventArgs e)
+        private void lb_word_MouseMove(object sender, MouseEventArgs e)
         {
             MoveForm_MoveEvent();
         }

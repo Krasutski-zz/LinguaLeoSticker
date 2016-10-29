@@ -49,9 +49,9 @@
             this.lb_word.Size = new System.Drawing.Size(96, 13);
             this.lb_word.TabIndex = 0;
             this.lb_word.Text = "Lingua Leo Sticker";
-            this.lb_word.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lb_text_MouseDown);
-            this.lb_word.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lb_text_MouseMove);
-            this.lb_word.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lb_text_MouseUp);
+            this.lb_word.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lb_word_MouseDown);
+            this.lb_word.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lb_word_MouseMove);
+            this.lb_word.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lb_word_MouseUp);
             // 
             // lb_translate
             // 
