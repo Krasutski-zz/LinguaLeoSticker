@@ -130,8 +130,17 @@ namespace ConfigFile
                 TextFontConvert = config.TextFont;
                 TextTranslateFontConvert = config.TextTranslateFont;
                 AutoLoad = config.AutoLoad;
-                LinguaLeoUser = config.LinguaLeoUser;
-                LinguaLeoPassword = config.LinguaLeoPassword;
+
+                if (config.LinguaLeoUser != null)
+                {
+                    LinguaLeoUser = config.LinguaLeoUser;
+                }
+
+                if (config.LinguaLeoPassword != null)
+                {
+                    LinguaLeoPassword = config.LinguaLeoPassword;
+                }
+
                 RandomMode = config.RandomMode;
             }
             catch (Exception ext)
