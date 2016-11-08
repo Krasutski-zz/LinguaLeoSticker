@@ -504,6 +504,7 @@ namespace LinguaLeoSticker
             {
                 if (isDoubleEnterInTxtWord)
                 {
+                    isDoubleEnterInTxtWord = false;
                     AddToDictonary();
                     return;
                 }
@@ -515,9 +516,20 @@ namespace LinguaLeoSticker
                 isDoubleEnterInTxtWord = false;
             }
 
-            Keys crt_v = Keys.Capital | Keys.RButton;
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                if (txtWord.Text != "")
+                {
+                    txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
+                }
+            }
+        }
 
-            if ((e.KeyChar == (char)Keys.Enter) || (e.KeyChar == (char)crt_v))
+        private void txtWord_KeyUp(object sender, KeyEventArgs e)
+        {
+            Keys crt_v = Keys.V | Keys.Control;
+
+            if (e.KeyData == crt_v)
             {
                 if (txtWord.Text != "")
                 {
