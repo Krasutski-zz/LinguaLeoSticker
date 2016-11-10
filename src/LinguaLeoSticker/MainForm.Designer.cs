@@ -49,9 +49,9 @@
             this.lb_word.Size = new System.Drawing.Size(96, 13);
             this.lb_word.TabIndex = 0;
             this.lb_word.Text = "Lingua Leo Sticker";
-            this.lb_word.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lb_word_MouseDown);
-            this.lb_word.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lb_word_MouseMove);
-            this.lb_word.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lb_word_MouseUp);
+            this.lb_word.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MoveForm_DownEvent);
+            this.lb_word.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MoveForm_MoveEvent);
+            this.lb_word.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MoveForm_UpEvent);
             // 
             // lb_translate
             // 
@@ -62,9 +62,9 @@
             this.lb_translate.Size = new System.Drawing.Size(90, 13);
             this.lb_translate.TabIndex = 1;
             this.lb_translate.Text = "LinguaLeoSticker";
-            this.lb_translate.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lb_text_translate_MouseDown);
-            this.lb_translate.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lb_text_translate_MouseMove);
-            this.lb_translate.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lb_text_translate_MouseUp);
+            this.lb_translate.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MoveForm_DownEvent);
+            this.lb_translate.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MoveForm_MoveEvent);
+            this.lb_translate.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MoveForm_UpEvent);
             // 
             // tmrChangeWord
             // 
@@ -148,12 +148,13 @@
             this.Name = "frmSticker";
             this.ShowInTaskbar = false;
             this.Text = "LinguaLeoSticker";
+            this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmSticker_FormClosing);
             this.Load += new System.EventHandler(this.frmSticker_Load);
             this.DoubleClick += new System.EventHandler(this.frmSticker_DoubleClick);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frmSticker_MouseDown);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.frmSticker_MouseMove);
-            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.frmSticker_MouseUp);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MoveForm_DownEvent);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MoveForm_MoveEvent);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MoveForm_UpEvent);
             this.ResumeLayout(false);
             this.PerformLayout();
 

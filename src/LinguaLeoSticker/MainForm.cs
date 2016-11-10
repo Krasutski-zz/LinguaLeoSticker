@@ -101,7 +101,7 @@ namespace LinguaLeoSticker
         }
 
 
-        private void MoveForm_DownEvent(MouseEventArgs e)
+        private void MoveForm_DownEvent(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -110,7 +110,7 @@ namespace LinguaLeoSticker
             }
         }
 
-        private void MoveForm_MoveEvent()
+        private void MoveForm_MoveEvent(object sender, MouseEventArgs e)
         {
             if (isMouseDown)
             {
@@ -120,7 +120,7 @@ namespace LinguaLeoSticker
             }
         }
 
-        private void MoveForm_UpEvent(MouseEventArgs e)
+        private void MoveForm_UpEvent(object sender, MouseEventArgs e)
         {
             // Changes the isMouseDown field so that the form does
             // not move unless the user is pressing the left mouse button.
@@ -132,52 +132,7 @@ namespace LinguaLeoSticker
                 AppConf.Y = this.Top;
                 AppConf.X = this.Left;
             }
-        }
-
-        private void lb_word_MouseDown(object sender, MouseEventArgs e)
-        {
-            MoveForm_DownEvent(e);
-        }
-
-        private void lb_word_MouseUp(object sender, MouseEventArgs e)
-        {
-            MoveForm_UpEvent(e);
-        }
-
-        private void lb_word_MouseMove(object sender, MouseEventArgs e)
-        {
-            MoveForm_MoveEvent();
-        }
-
-        private void lb_text_translate_MouseUp(object sender, MouseEventArgs e)
-        {
-            MoveForm_UpEvent(e);
-        }
-
-        private void lb_text_translate_MouseMove(object sender, MouseEventArgs e)
-        {
-            MoveForm_MoveEvent();
-        }
-
-        private void lb_text_translate_MouseDown(object sender, MouseEventArgs e)
-        {
-            MoveForm_DownEvent(e);
-        }
-
-        private void frmSticker_MouseUp(object sender, MouseEventArgs e)
-        {
-            MoveForm_UpEvent(e);
-        }
-
-        private void frmSticker_MouseMove(object sender, MouseEventArgs e)
-        {
-            MoveForm_MoveEvent();
-        }
-
-        private void frmSticker_MouseDown(object sender, MouseEventArgs e)
-        {
-            MoveForm_DownEvent(e);
-        }
+        }       
 
         private void frmSticker_Load(object sender, EventArgs e)
         {
