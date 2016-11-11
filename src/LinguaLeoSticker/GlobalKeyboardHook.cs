@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace KeyboardHook
 {
     class GlobalKeyboardHook
     {
-        public delegate void key_hook_Delegate(Keys key);
+        public delegate bool key_hook_Delegate(int KeyStatus, Keys ActiveKey);
 
         public event key_hook_Delegate key_hook_evt = null;
 
@@ -26,11 +27,21 @@ namespace KeyboardHook
             public int dwExtraInfo;
         }
 
-        const int WM_KEYDOWN = 0x100;
-        const int WM_KEYUP = 0x101;
-        const int WM_SYSKEYDOWN = 0x104;
-        const int WM_SYSKEYUP = 0x105;
-        const int WH_KEYBOARD_LL = 13;
+        private const int WH_KEYBOARD_LL = 13;
+
+        public enum KeyboardMessage
+        {
+            WM_KEYDOWN = 0x0100,
+            WM_KEYUP = 0x0101,
+            WM_CHAR = 0x0102,
+            WM_DEADCHAR = 0x0103,
+            WM_SYSKEYDOWN = 0x0104,
+            WM_SYSKEYUP = 0x0105,
+            WM_SYSCHAR = 0x0106,
+            WM_SYSDEADCHAR = 0x0107,
+            WM_KEYFIRST = WM_KEYDOWN,
+            WM_KEYLAST = 0x0108,
+        }
 
         #endregion
 
@@ -45,13 +56,15 @@ namespace KeyboardHook
 
         public List<Keys> HookedKeys = new List<Keys>();
         IntPtr hookHandle = IntPtr.Zero;
-
         #endregion
 
         #region DLL Imports
 
         [DllImport("kernel32.dll")]
         static extern IntPtr LoadLibrary(string lpFileName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         static extern IntPtr SetWindowsHookEx(int hookID, KeyboardHookProc callback, IntPtr hInstance, uint threadID);
@@ -71,13 +84,15 @@ namespace KeyboardHook
 
         public int hookProc(int nCode, int wParam, ref GlobalKeyboardHookStruct lParam)
         {
+            KeyboardMessage Msg = (KeyboardMessage)wParam;
+
+            Keys key_presed = (Keys)lParam.vkCode;
 
             if (key_hook_evt != null)
             {
-                if (wParam == WM_KEYUP)
+                if (key_hook_evt(wParam, key_presed))
                 {
-                    Keys key = (Keys)lParam.vkCode;
-                    key_hook_evt(key);
+                    return 1;
                 }
             }
 
@@ -89,9 +104,12 @@ namespace KeyboardHook
         {
             _hookProc = new KeyboardHookProc(hookProc);
             IntPtr hInstance = LoadLibrary("user32");
-            hookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, _hookProc, hInstance, 0);
-            //IntPtr hInstance = LoadLibrary("user32");
-            //hookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, hInstance, 0);
+
+            using (Process curProcess = Process.GetCurrentProcess())
+            using (ProcessModule curModule = curProcess.MainModule)
+            {
+                hookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, _hookProc, GetModuleHandle(curModule.ModuleName), 0);
+            }
         }
 
 

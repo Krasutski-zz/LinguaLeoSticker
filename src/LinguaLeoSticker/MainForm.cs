@@ -39,7 +39,10 @@ namespace LinguaLeoSticker
 
         private bool isDoubleEnterInTxtWord = false;
 
-        static Keys PrevKey;
+        private const Keys HotKey1 = Keys.LMenu;
+        private const Keys HotKey2 = Keys.C;
+        private bool Key1_IsPressed = false;
+        private bool Key2_IsPressed = false;
 
         LinguaLeoAPI llApi = new LinguaLeoAPI();
 
@@ -205,18 +208,44 @@ namespace LinguaLeoSticker
             hk.key_hook_evt += key_hook;
         }
 
-        public void key_hook(Keys key)
+        public bool key_hook(int KeybMsg, Keys key)
         {
-            if ((key == Keys.F) && (PrevKey == Keys.LMenu))
+            GlobalKeyboardHook.KeyboardMessage km = (GlobalKeyboardHook.KeyboardMessage)KeybMsg;
+
+            if (key == HotKey1)
+            {
+                if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYDOWN || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYDOWN)
+                {
+                    Key1_IsPressed = true;
+                }
+                else if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYUP || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYUP)
+                {
+                    Key1_IsPressed = false;
+                }
+            }
+            else if (key == HotKey2)
+            {
+                if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYDOWN || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYDOWN)
+                {
+                    Key2_IsPressed = true;
+                }
+                else if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYUP || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYUP)
+                {
+                    Key2_IsPressed = false;
+                }
+            }
+
+            if ( Key1_IsPressed && Key2_IsPressed)
             {
                 ExtendColapseForm();
+                return true;
             }
-            else if (key == Keys.Escape && Form_Is_Extended)
+            else if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYUP && key == Keys.Escape && Form_Is_Extended)
             {
                 ExtendColapseForm();
             }
 
-            PrevKey = key;
+            return false;
         }
 
         private int GetFormHeight(bool extended)
@@ -336,6 +365,11 @@ namespace LinguaLeoSticker
 
                 txtWord.Text = "";
                 txtTranslate.Text = "";
+
+                WindowState = FormWindowState.Minimized;
+                WindowState = FormWindowState.Normal;
+
+                ActiveControl = txtWord;
                 txtWord.Select();
                 txtWord.Focus();
 
