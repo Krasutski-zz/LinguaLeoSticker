@@ -1,2 +1,2 @@
 # LinguaLeoSticker
-Lingua Leo Sticker, desctop application for learning english
+Lingua Leo Sticker, desktop application for learning english
