@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LinguaLeoSticker
@@ -16,7 +13,7 @@ namespace LinguaLeoSticker
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmSticker());
+            Application.Run(new FrmSticker());
         }
     }
 }

@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using System.Diagnostics;
 
-namespace KeyboardHook
+namespace LinguaLeoSticker
 {
     class GlobalKeyboardHook
     {
-        public delegate bool key_hook_Delegate(int KeyStatus, Keys ActiveKey);
+        public delegate bool KeyHookDelegate(int keyStatus, Keys activeKey);
 
-        public event key_hook_Delegate key_hook_evt = null;
+        public event KeyHookDelegate KeyHookEvt;
 
         #region Definition of Structures, Constants and Delegates
 
@@ -20,27 +18,27 @@ namespace KeyboardHook
 
         public struct GlobalKeyboardHookStruct
         {
-            public int vkCode;
-            public int scanCode;
-            public int flags;
-            public int time;
-            public int dwExtraInfo;
+            public int VkCode;
+            public int ScanCode;
+            public int Flags;
+            public int Time;
+            public int DwExtraInfo;
         }
 
-        private const int WH_KEYBOARD_LL = 13;
+        private const int WhKeyboardLl = 13;
 
         public enum KeyboardMessage
         {
-            WM_KEYDOWN = 0x0100,
-            WM_KEYUP = 0x0101,
-            WM_CHAR = 0x0102,
-            WM_DEADCHAR = 0x0103,
-            WM_SYSKEYDOWN = 0x0104,
-            WM_SYSKEYUP = 0x0105,
-            WM_SYSCHAR = 0x0106,
-            WM_SYSDEADCHAR = 0x0107,
-            WM_KEYFIRST = WM_KEYDOWN,
-            WM_KEYLAST = 0x0108,
+            WmKeydown = 0x0100,
+            WmKeyup = 0x0101,
+            WmChar = 0x0102,
+            WmDeadchar = 0x0103,
+            WmSyskeydown = 0x0104,
+            WmSyskeyup = 0x0105,
+            WmSyschar = 0x0106,
+            WmSysdeadchar = 0x0107,
+            WmKeyfirst = WmKeydown,
+            WmKeylast = 0x0108,
         }
 
         #endregion
@@ -55,7 +53,7 @@ namespace KeyboardHook
         #region Instance Variables
 
         public List<Keys> HookedKeys = new List<Keys>();
-        IntPtr hookHandle = IntPtr.Zero;
+        private IntPtr _hookHandle = IntPtr.Zero;
         #endregion
 
         #region DLL Imports
@@ -67,7 +65,7 @@ namespace KeyboardHook
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
-        static extern IntPtr SetWindowsHookEx(int hookID, KeyboardHookProc callback, IntPtr hInstance, uint threadID);
+        static extern IntPtr SetWindowsHookEx(int hookId, KeyboardHookProc callback, IntPtr hInstance, uint threadId);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         static extern bool UnhookWindowsHookEx(IntPtr hookHandle);
@@ -82,40 +80,38 @@ namespace KeyboardHook
 
         #region Public Methods
 
-        public int hookProc(int nCode, int wParam, ref GlobalKeyboardHookStruct lParam)
+        public int HookProc(int nCode, int wParam, ref GlobalKeyboardHookStruct lParam)
         {
-            KeyboardMessage Msg = (KeyboardMessage)wParam;
+            Keys keyPresed = (Keys)lParam.VkCode;
 
-            Keys key_presed = (Keys)lParam.vkCode;
-
-            if (key_hook_evt != null)
+            if (KeyHookEvt != null)
             {
-                if (key_hook_evt(wParam, key_presed))
+                if (KeyHookEvt(wParam, keyPresed))
                 {
                     return 1;
                 }
             }
 
-            return CallNextHookEx(hookHandle, nCode, wParam, ref lParam);
+            return CallNextHookEx(_hookHandle, nCode, wParam, ref lParam);
         }
 
         KeyboardHookProc _hookProc;
-        public void hook()
+        public void Hook()
         {
-            _hookProc = new KeyboardHookProc(hookProc);
-            IntPtr hInstance = LoadLibrary("user32");
+            _hookProc = HookProc;
+            LoadLibrary("user32");
 
             using (Process curProcess = Process.GetCurrentProcess())
             using (ProcessModule curModule = curProcess.MainModule)
             {
-                hookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, _hookProc, GetModuleHandle(curModule.ModuleName), 0);
+                _hookHandle = SetWindowsHookEx(WhKeyboardLl, _hookProc, GetModuleHandle(curModule.ModuleName), 0);
             }
         }
 
 
-        public void unhook()
+        public void Unhook()
         {
-            UnhookWindowsHookEx(hookHandle);
+            UnhookWindowsHookEx(_hookHandle);
         }
 
         #endregion
@@ -124,12 +120,12 @@ namespace KeyboardHook
 
         public GlobalKeyboardHook()
         {
-            hook();
+            Hook();
         }
 
         ~GlobalKeyboardHook()
         {
-            unhook();
+            Unhook();
         }
 
         #endregion

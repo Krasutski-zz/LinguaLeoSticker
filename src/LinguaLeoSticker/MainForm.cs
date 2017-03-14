@@ -1,92 +1,93 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using LinguaLeoSticker.Properties;
 using Microsoft.Win32;
-
-using ConfigFile;
-using KeyboardHook;
-using DictonaryManager;
 
 namespace LinguaLeoSticker
 {
-    public partial class frmSticker : Form
+    public partial class FrmSticker : Form
     {
-        private Config AppConf = null;
+        private readonly Config _appConf;
 
-        private Point moveFormStartPoint;
-        private bool isMouseDown = false;
+        private Point _moveFormStartPoint;
+        private bool _isMouseDown;
 
-        private int TimerFirstWord = 1000;
-        private int TimerSecondWord = 1000;
+        private readonly int _timerSecondWord;
 
-        private int step_display = 0;
-        private string[] current_couple = null;
+        private int _stepDisplay;
 
-        private bool Form_Is_Extended = false;
+        private bool _formIsExtended;
 
-        const int border_size = 10;
+        private const int BorderSize = 10;
 
         const int ButtonNaviWidth = 50;
 
-        private DictMng Dict = new DictMng();
+        private readonly DictMng _dict = new DictMng();
 
-        private bool isDoubleEnterInTxtWord = false;
+        private bool _isDoubleEnterInTxtWord;
 
         private const Keys HotKey1 = Keys.LMenu;
         private const Keys HotKey2 = Keys.C;
-        private bool Key1_IsPressed = false;
-        private bool Key2_IsPressed = false;
+        private bool _key1IsPressed;
+        private bool _key2IsPressed;
 
-        LinguaLeoAPI llApi = new LinguaLeoAPI();
+        private readonly LinguaLeoApi _llApi = new LinguaLeoApi();
 
-        GlobalKeyboardHook hk = new GlobalKeyboardHook();
+        private readonly GlobalKeyboardHook _hk = new GlobalKeyboardHook();
 
+        public string[] CurrentCouple { get; set; }
 
-
-        public frmSticker()
+        public FrmSticker()
         {
             TopMost = true;
             InitializeComponent();
 
-            AppConf = new Config(Path.Combine(Application.StartupPath,"config.xml"));
+            _appConf = new Config(Path.Combine(Application.StartupPath,"config.xml"));
 
-            this.Height = AppConf.Height;
-            this.Width = AppConf.Width;
-            this.Top = AppConf.Y;
-            this.Left = AppConf.X;
-            this.BackColor = AppConf.BackgroundColor;
-            lb_word.ForeColor = AppConf.TextColor;
-            lb_translate.ForeColor = AppConf.TextTranslateColor;
-            lb_word.Font = AppConf.TextFont;
-            lb_translate.Font = AppConf.TextTranslateFont;
-            this.TimerFirstWord = AppConf.TimeText;
-            this.TimerSecondWord = AppConf.TimeTextTranslate;
+            Height = _appConf.Height;
+            Width = _appConf.Width;
+            Top = _appConf.Y;
+            Left = _appConf.X;
+            BackColor = _appConf.BackgroundColor;
+            lb_word.ForeColor = _appConf.TextColor;
+            lb_translate.ForeColor = _appConf.TextTranslateColor;
+            lb_word.Font = _appConf.TextFont;
+            lb_translate.Font = _appConf.TextTranslateFont;
+            TimerFirstWord2 = _appConf.TimeText;
+            _timerSecondWord = _appConf.TimeTextTranslate;
            
             RegistryKey rkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-            if (AppConf.AutoLoad)
+            if (_appConf.AutoLoad)
             {
-                rkey.SetValue(Application.ProductName, Application.ExecutablePath.ToString());
+                rkey?.SetValue(Application.ProductName, value: Application.ExecutablePath);
             }
             else
             {
                 try
                 {
-                    rkey.DeleteValue(Application.ProductName);
+                    rkey?.DeleteValue(Application.ProductName);
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(),"Error");
+                    MessageBox.Show(ex.ToString(),@"Error");
                 }
             }
         }
+
+        public sealed override Color BackColor
+        {
+            get { return base.BackColor; }
+            set { base.BackColor = value; }
+        }
+
+        public int TimerFirstWord => TimerFirstWord1;
+
+        public int TimerFirstWord1 => TimerFirstWord2;
+
+        public int TimerFirstWord2 { get; }
 
         private bool TextBox_CommonKey_Press(object sender, KeyPressEventArgs e)
         {
@@ -108,63 +109,63 @@ namespace LinguaLeoSticker
         {
             if (e.Button == MouseButtons.Left)
             {
-                moveFormStartPoint = new Point(Left - Control.MousePosition.X, Top - Control.MousePosition.Y);
-                isMouseDown = true;
+                _moveFormStartPoint = new Point(Left - MousePosition.X, y: Top - MousePosition.Y);
+                _isMouseDown = true;
             }
         }
 
         private void MoveForm_MoveEvent(object sender, MouseEventArgs e)
         {
-            if (isMouseDown)
+            if (_isMouseDown)
             {
-                Point mousePos = Control.MousePosition;
-                mousePos.Offset(moveFormStartPoint.X, moveFormStartPoint.Y);
+                Point mousePos = MousePosition;
+                mousePos.Offset(_moveFormStartPoint.X, _moveFormStartPoint.Y);
                 Location = mousePos;
             }
         }
 
         private void MoveForm_UpEvent(object sender, MouseEventArgs e)
         {
-            // Changes the isMouseDown field so that the form does
+            // Changes the _isMouseDown field so that the form does
             // not move unless the user is pressing the left mouse button.
             if (e.Button == MouseButtons.Left)
             {
-                isMouseDown = false;
+                _isMouseDown = false;
 
                 //save current position
-                AppConf.Y = this.Top;
-                AppConf.X = this.Left;
+                _appConf.Y = Top;
+                _appConf.X = Left;
             }
         }       
 
         private void frmSticker_Load(object sender, EventArgs e)
         {
-            ///try open dictonary
-            if (Dict.Open(Path.Combine(Application.StartupPath, AppConf.DictonaryPath)))
+            //try open dictonary
+            if (_dict.Open(Path.Combine(Application.StartupPath, _appConf.DictonaryPath)))
             {
                 //lb_translate.Text = DictonatyPath;
                 StartShow();
             }
             else
             {
-                lb_translate.Text = "Can\'t open dictonary file!";
+                lb_translate.Text = Resources.FrmSticker_frmSticker_Load_Can_t_open_dictonary_file;
 
                 try
                 {
-                    if (!llApi.is_Auth())
+                    if (!_llApi.is_Auth())
                     {
-                        llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+                        _llApi.Auth(_appConf.LinguaLeoUser, _appConf.LinguaLeoPassword);
                     }
 
-                    string[] ll_dict;
-                    llApi.GetUserDict(out ll_dict);
+                    string[] llDict;
+                    _llApi.GetUserDict(out llDict);
 
-                    if (ll_dict.Length > 0)
+                    if (llDict.Length > 0)
                     {
-                        Dict.Open(ll_dict);
+                        _dict.Open(llDict);
 
                         //create dictonary file
-                        Dict.Save(Path.Combine(Application.StartupPath, AppConf.DictonaryPath));
+                        _dict.Save(Path.Combine(Application.StartupPath, _appConf.DictonaryPath));
                         StartShow();
                     }
                 }
@@ -174,24 +175,24 @@ namespace LinguaLeoSticker
                 }
             }
 
-            this.Top = AppConf.Y;
-            this.Left = AppConf.X;
+            Top = _appConf.Y;
+            Left = _appConf.X;
 
             AlignTextOnForm();
 
             /* Add align text boxses */
             txtWord.Left = 0;
-            txtWord.Top = lb_translate.Top + lb_translate.Height + border_size;
-            txtWord.Width = this.Width;
+            txtWord.Top = lb_translate.Top + lb_translate.Height + BorderSize;
+            txtWord.Width = Width;
 
             txtTranslate.Left = 0;
             txtTranslate.Top = txtWord.Top + txtWord.Height;
-            txtTranslate.Width = this.Width;
+            txtTranslate.Width = Width;
 
             /* Add align button */
             btnAddToDictonary.Left = 0;
             btnAddToDictonary.Top = txtTranslate.Top + txtTranslate.Height;
-            btnAddToDictonary.Width = this.Width;
+            btnAddToDictonary.Width = Width;
 
             btn_Back.Top = btn_Delete.Top = btn_Forward.Top = btnAddToDictonary.Top + btnAddToDictonary.Height;
             btn_Back.Width = btn_Forward.Width = ButtonNaviWidth;
@@ -199,48 +200,49 @@ namespace LinguaLeoSticker
             btn_Back.Left = 0;
             btn_Back.Width = ButtonNaviWidth;
 
-            btn_Forward.Left = this.Width - ButtonNaviWidth;
+            btn_Forward.Left = Width - ButtonNaviWidth;
             btn_Forward.Width = ButtonNaviWidth;
 
             btn_Delete.Left = btn_Back.Width;
-            btn_Delete.Width = this.Width - 2 * ButtonNaviWidth;
+            btn_Delete.Width = Width - 2 * ButtonNaviWidth;
 
-            hk.key_hook_evt += key_hook;
+            _hk.KeyHookEvt += key_hook;
         }
 
-        public bool key_hook(int KeybMsg, Keys key)
+        public bool key_hook(int keybMsg, Keys key)
         {
-            GlobalKeyboardHook.KeyboardMessage km = (GlobalKeyboardHook.KeyboardMessage)KeybMsg;
+            if (keybMsg <= 0) throw new ArgumentOutOfRangeException(nameof(keybMsg));
+            GlobalKeyboardHook.KeyboardMessage km = (GlobalKeyboardHook.KeyboardMessage)keybMsg;
 
             if (key == HotKey1)
             {
-                if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYDOWN || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYDOWN)
+                if (km == GlobalKeyboardHook.KeyboardMessage.WmKeydown || km == GlobalKeyboardHook.KeyboardMessage.WmSyskeydown)
                 {
-                    Key1_IsPressed = true;
+                    _key1IsPressed = true;
                 }
-                else if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYUP || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYUP)
+                else if (km == GlobalKeyboardHook.KeyboardMessage.WmKeyup || km == GlobalKeyboardHook.KeyboardMessage.WmSyskeyup)
                 {
-                    Key1_IsPressed = false;
+                    _key1IsPressed = false;
                 }
             }
             else if (key == HotKey2)
             {
-                if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYDOWN || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYDOWN)
+                if (km == GlobalKeyboardHook.KeyboardMessage.WmKeydown || km == GlobalKeyboardHook.KeyboardMessage.WmSyskeydown)
                 {
-                    Key2_IsPressed = true;
+                    _key2IsPressed = true;
                 }
-                else if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYUP || km == GlobalKeyboardHook.KeyboardMessage.WM_SYSKEYUP)
+                else if (km == GlobalKeyboardHook.KeyboardMessage.WmKeyup || km == GlobalKeyboardHook.KeyboardMessage.WmSyskeyup)
                 {
-                    Key2_IsPressed = false;
+                    _key2IsPressed = false;
                 }
             }
 
-            if ( Key1_IsPressed && Key2_IsPressed)
+            if ( _key1IsPressed && _key2IsPressed)
             {
                 ExtendColapseForm();
                 return true;
             }
-            else if (km == GlobalKeyboardHook.KeyboardMessage.WM_KEYUP && key == Keys.Escape && Form_Is_Extended)
+            else if (km == GlobalKeyboardHook.KeyboardMessage.WmKeyup && key == Keys.Escape && _formIsExtended)
             {
                 ExtendColapseForm();
             }
@@ -254,40 +256,40 @@ namespace LinguaLeoSticker
             {
                 return lb_word.Height + 
                     lb_translate.Height + 
-                    3 * border_size + 
+                    3 * BorderSize + 
                     txtTranslate.Height + 
                     txtWord.Height + 
                     btnAddToDictonary.Height + 
                     btn_Delete.Height;
             }
 
-            return lb_word.Height + lb_translate.Height + 3 * border_size;
+            return lb_word.Height + lb_translate.Height + 3 * BorderSize;
         }
 
         private void AlignTextOnForm()
         {
 
-            this.Height = GetFormHeight(Form_Is_Extended);
+            Height = GetFormHeight(_formIsExtended);
 
-            lb_word.Top = border_size;
-            lb_translate.Top = lb_word.Height + lb_word.Top + border_size;
+            lb_word.Top = BorderSize;
+            lb_translate.Top = lb_word.Height + lb_word.Top + BorderSize;
 
 
-            int freespace_first_word = this.Width - lb_word.Width;
-            if (freespace_first_word > 0)
+            var freespaceFirstWord = Width - lb_word.Width;
+            if (freespaceFirstWord > 0)
             {
-                lb_word.Left = freespace_first_word / 2;
+                lb_word.Left = freespaceFirstWord / 2;
             }
             else
             {
                 lb_word.Left = 0;
             }
-           
 
-            int freespace_second_word = this.Width - lb_translate.Width;
-            if (freespace_first_word > 0)
+
+            var freespaceSecondWord = Width - lb_translate.Width;
+            if (freespaceFirstWord > 0)
             {
-                lb_translate.Left = freespace_second_word / 2;
+                lb_translate.Left = freespaceSecondWord / 2;
             }
             else
             {
@@ -296,38 +298,32 @@ namespace LinguaLeoSticker
         }
 
 
-        private void DisplayCouple(string Word, string Translate)
+        private void DisplayCouple(string word, string translate)
         {
-            lb_word.Text = Word;
-            lb_translate.Text = Translate;
+            if (word == null) throw new ArgumentNullException(nameof(word));
+            lb_word.Text = word;
+            lb_translate.Text = translate;
             
             AlignTextOnForm();   
         }
 
         private void tmrChangeWord_Tick(object sender, EventArgs e)
         {
-            if ((step_display++ & 1) == 0)
+            if ((_stepDisplay++ & 1) == 0)
             {
-                if (AppConf.RandomMode)
+                CurrentCouple = _appConf.RandomMode ? _dict.GetRandomCouple() : _dict.GetNextCouple();
+                if (CurrentCouple != null)
                 {
-                    current_couple = Dict.GetRandomCouple();
-                }
-                else
-                {
-                    current_couple = Dict.GetNextCouple();
-                }
-                if (current_couple != null)
-                {
-                    DisplayCouple(current_couple[0], "");
+                    DisplayCouple(CurrentCouple[0], "");
                     tmrChangeWord.Interval = TimerFirstWord;
                 }
             }
             else
             {
-                if (current_couple != null)
+                if (CurrentCouple != null)
                 {
-                    DisplayCouple(current_couple[0], current_couple[1]);
-                    tmrChangeWord.Interval = TimerSecondWord;
+                    DisplayCouple(CurrentCouple[0], CurrentCouple[1]);
+                    tmrChangeWord.Interval = _timerSecondWord;
                 }
             }         
         }
@@ -345,19 +341,20 @@ namespace LinguaLeoSticker
 
         private void frmSticker_FormClosing(object sender, FormClosingEventArgs e)
         {
-            AppConf.saveConfig();   
+            _appConf.SaveConfig();   
         }
 
         private void ExtendColapseForm()
         {
 
-            Form_Is_Extended = !Form_Is_Extended;
+            _formIsExtended = !_formIsExtended;
             AlignTextOnForm();
 
-            if (Form_Is_Extended)
+            int screenWidth = Screen.FromControl(this).Bounds.Width;
+            if (_formIsExtended)
             {
                 StopShow();
-                string[] couple = Dict.GetCurrentCouple();
+                string[] couple = _dict.GetCurrentCouple();
                 if (couple != null)
                 {
                     DisplayCouple(couple[0], couple[1]);
@@ -378,11 +375,8 @@ namespace LinguaLeoSticker
                     Top = 0;
                 }
 
-                int ScreenWidth = Screen.FromControl(this).Bounds.Width;
-                if (Left > ScreenWidth - Width)
-                {
-                    Left = ScreenWidth - Width;
-                }
+                if (Left <= screenWidth - Width) return;
+                Left = screenWidth - Width;
             }
             else
             {
@@ -401,11 +395,11 @@ namespace LinguaLeoSticker
             string tword = txtTranslate.Text.Trim();
             string word = txtWord.Text.Trim();
 
-            if (!llApi.is_Auth())
+            if (!_llApi.is_Auth())
             {
                 try
                 {
-                    llApi.Auth(AppConf.LinguaLeoUser, AppConf.LinguaLeoPassword);
+                    _llApi.Auth(_appConf.LinguaLeoUser, _appConf.LinguaLeoPassword);
                 }
                 catch (Exception ex)
                 {
@@ -413,21 +407,21 @@ namespace LinguaLeoSticker
                 }
             }
 
-            if (llApi.is_Auth())
+            if (_llApi.is_Auth())
             {
-                llApi.AddWord(word, tword, "");
+                _llApi.AddWord(word, tword, "");
             }
 
-            if (!Dict.AddWord(word, tword))
+            if (!_dict.AddWord(word, tword))
             {
-                MessageBox.Show("Cant add word to dictonary");
+                MessageBox.Show(Resources.FrmSticker_frmSticker_Load_Can_t_open_dictonary_file);
             }
             else
             {
-                Form_Is_Extended = false;
+                _formIsExtended = false;
                 StartShow();
                 AlignTextOnForm();
-                Dict.Save(Path.Combine(Application.StartupPath, AppConf.DictonaryPath));
+                _dict.Save(Path.Combine(Application.StartupPath, _appConf.DictonaryPath));
             }
         }
 
@@ -449,7 +443,7 @@ namespace LinguaLeoSticker
 
         private void btn_Forward_Click(object sender, EventArgs e)
         {
-            string[] couple = Dict.GetNextCouple();
+            string[] couple = _dict.GetNextCouple();
             if (couple != null)
             {
                 DisplayCouple(couple[0], couple[1]);
@@ -458,7 +452,7 @@ namespace LinguaLeoSticker
 
         private void btn_Back_Click(object sender, EventArgs e)
         {
-            string[] couple = Dict.GetPrevCouple() ;
+            string[] couple = _dict.GetPrevCouple() ;
             if (couple != null)
             {
                 DisplayCouple(couple[0], couple[1]);
@@ -467,14 +461,14 @@ namespace LinguaLeoSticker
 
         private void btn_Delete_Click(object sender, EventArgs e)
         {
-            string[] couple = Dict.GetCurrentCouple();
+            string[] couple = _dict.GetCurrentCouple();
             if (couple != null)
             {
-                Dict.RemoveWord(couple);
-                Dict.Save(Path.Combine(Application.StartupPath, AppConf.DictonaryPath));
+                _dict.RemoveWord(couple);
+                _dict.Save(Path.Combine(Application.StartupPath, _appConf.DictonaryPath));
             }
 
-            couple = Dict.GetCurrentCouple();
+            couple = _dict.GetCurrentCouple();
             if (couple != null)
             {
                 DisplayCouple(couple[0], couple[1]);
@@ -491,25 +485,25 @@ namespace LinguaLeoSticker
 
             if (e.KeyChar == (char) Keys.Enter)
             {
-                if (isDoubleEnterInTxtWord)
+                if (_isDoubleEnterInTxtWord)
                 {
-                    isDoubleEnterInTxtWord = false;
+                    _isDoubleEnterInTxtWord = false;
                     AddToDictonary();
                     return;
                 }
 
-                isDoubleEnterInTxtWord = true;
+                _isDoubleEnterInTxtWord = true;
             }
             else
             {
-                isDoubleEnterInTxtWord = false;
+                _isDoubleEnterInTxtWord = false;
             }
 
             if (e.KeyChar == (char)Keys.Enter)
             {
                 if (txtWord.Text != "")
                 {
-                    txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
+                    txtTranslate.Text = _llApi.GetTranslate(txtWord.Text);
                 }
             }
         }
@@ -522,7 +516,7 @@ namespace LinguaLeoSticker
             {
                 if (txtWord.Text != "")
                 {
-                    txtTranslate.Text = llApi.GetTranslate(txtWord.Text);
+                    txtTranslate.Text = _llApi.GetTranslate(txtWord.Text);
                 }
             }
         }

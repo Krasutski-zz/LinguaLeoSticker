@@ -114,4 +114,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="FrmSticker_frmSticker_Load_Can_t_open_dictonary_file" xml:space="preserve">
+    <value>Can't open dictonary file!</value>
+  </data>
 </root>

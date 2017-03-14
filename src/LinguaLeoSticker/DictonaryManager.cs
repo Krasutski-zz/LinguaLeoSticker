@@ -1,28 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
-namespace DictonaryManager
+namespace LinguaLeoSticker
 {
     class DictMng
     {
+        private string[] _data;
+        private int _dictonaryLine;
 
-        private string[] Data = null;    
-        private int DictonaryLine = 0;
+        private const char Separator = ':';
 
-        private const char separator = ':';
-
-
-        private string[] LineToText(int LineNum)
+        private string[] LineToText(int lineNum)
         {
-            string Line = "";
+            if (lineNum <= 0) throw new ArgumentOutOfRangeException(nameof(lineNum));
+            string line;
 
             try
             {
-                Line = Data[LineNum];
+                line = _data[lineNum];
             }
             catch (Exception e)
             {
@@ -32,11 +28,11 @@ namespace DictonaryManager
 
             string[] couple = new string[2];
 
-            int pos = Line.IndexOf(separator);
+            int pos = line.IndexOf(Separator);
             if (pos != -1)
             {
-                couple[0] = Line.Substring(0, pos);
-                couple[1] = Line.Substring(pos + 1);
+                couple[0] = line.Substring(0, pos);
+                couple[1] = line.Substring(pos + 1);
             }
             else
             {
@@ -46,18 +42,19 @@ namespace DictonaryManager
             return couple;
         }
 
-        public bool Open(string Path)
+        public bool Open(string path)
         {
-            bool Ret = false;
+            if (path == null) throw new ArgumentNullException(nameof(path));
+            var ret = false;
 
-            if (Path != "")
+            if (path != "")
             {
                 try
                 {
-                    Data = File.ReadAllLines(Path, System.Text.Encoding.Default/*Encoding.GetEncoding(1251)*/);
-                    DictonaryLine = 0;
+                    _data = File.ReadAllLines(path, System.Text.Encoding.Default/*Encoding.GetEncoding(1251)*/);
+                    _dictonaryLine = 0;
 
-                    Ret = true;
+                    ret = true;
                 }
                 catch (Exception ex)
                 {
@@ -65,113 +62,116 @@ namespace DictonaryManager
                 }
             }
 
-            return Ret;
+            return ret;
         }
 
-        public void Open(string[] Dict)
+        public void Open(string[] dict)
         {
-            Data = Dict;
-            DictonaryLine = 0;
+            if (dict == null) throw new ArgumentNullException(nameof(dict));
+            _data = dict;
+            _dictonaryLine = 0;
         }
 
         public string[] GetRandomCouple()
         {
 
-            if (Data.Length == 0 || Data == null)
+            if (_data.Length == 0 || _data == null)
             {
                 return null;
             }
+            _dictonaryLine = new Random().Next(0, maxValue: _data.Length);
 
-            return LineToText(new Random().Next(0, Data.Count()));
+            return LineToText(_dictonaryLine);
         }
 
         public string[] GetCurrentCouple()
         {
 
-            if (Data == null || Data.Length == 0)
+            if (_data == null || _data.Length == 0)
             {
                 return null;
             }
 
-            if (DictonaryLine >= Data.Length)
+            if (_dictonaryLine >= _data.Length)
             {
-                DictonaryLine = Data.Length - 1;
+                _dictonaryLine = _data.Length - 1;
             } 
             
-            return LineToText(DictonaryLine);
+            return LineToText(_dictonaryLine);
         }
 
         public string[] GetNextCouple()
         {
 
-            if (Data == null || Data.Length == 0)
+            if (_data == null || _data.Length == 0)
             {
                 return null;
             }
 
-            ++DictonaryLine;
-            if (DictonaryLine >= Data.Count())
+            ++_dictonaryLine;
+            if (_dictonaryLine >= _data.Length)
             {
-                DictonaryLine = 0;
+                _dictonaryLine = 0;
             }
 
-            return LineToText(DictonaryLine);
+            return LineToText(_dictonaryLine);
         }
 
         public string[] GetPrevCouple()
         {
 
-            if (Data.Length == 0 || Data == null)
+            if (_data.Length == 0 || _data == null)
             {
                 return null;
             }
 
-            --DictonaryLine;
-            if (DictonaryLine < 0)
+            --_dictonaryLine;
+            if (_dictonaryLine < 0)
             {
-                DictonaryLine = Data.Count() - 1;
+                _dictonaryLine = _data.Length - 1;
             }
 
-            return LineToText(DictonaryLine);
+            return LineToText(_dictonaryLine);
         }
 
         public bool RemoveWord(string[] couple)
         {
-            var list = new List<string>(Data);
-            list.Remove(string.Format("{0}{1}{2}", couple[0], separator, couple[1]));
-            Data = list.ToArray();
+            var list = new List<string>(_data);
+            list.Remove($"{couple[0]}{Separator}{couple[1]}");
+            _data = list.ToArray();
 
             return true;
         }
 
-        public bool AddWord(string Word, string Translate)
+        public bool AddWord(string word, string translate)
         {
-            if (Word == "")
+            if (word == "")
             {
                 return false;
             }
 
-            if (Translate == "")
+            if (translate == "")
             {
                 return false;
             }
 
-            string line = String.Format("{0}{1}{2}", Word.ToLower(), separator, Translate.ToLower());
+            string line = $"{word.ToLower()}{Separator}{translate.ToLower()}";
 
-            if (Data != null)
+            if (_data != null)
             {
-                Array.Resize(ref Data, Data.Length + 1);
-                Data[Data.Length - 1] = line;
+                Array.Resize(ref _data, _data.Length + 1);
+                _data[_data.Length - 1] = line;
             }
 
             return true;
         }
 
-        public bool Save(string Path)
+        public bool Save(string path)
         {
-            if (Data != null)
+            if (path == null) throw new ArgumentNullException(nameof(path));
+            if (_data != null)
             {
-                File.WriteAllLines(Path, Data, System.Text.Encoding.UTF8);
+                File.WriteAllLines(path, _data, System.Text.Encoding.UTF8);
             }
 
             return true;

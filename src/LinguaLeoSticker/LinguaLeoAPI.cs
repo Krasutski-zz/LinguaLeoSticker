@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json;
 
 namespace LinguaLeoSticker
 {
-    class LinguaLeoAPI
+    internal class LinguaLeoApi
     {
-        private bool _is_auth = false;
         private CookieContainer _cookie = new CookieContainer();
-        private const string api_url = "http://api.lingualeo.com/";
+        private const string ApiUrl = "http://api.lingualeo.com/";
 
-        private bool WriteHttpRequest(string url, out string http_response, ref CookieContainer cookie)
+        public bool IsAuth { get; set; }
+
+        private static bool WriteHttpRequest(string url, out string httpResponse, ref CookieContainer cookie)
         {
-            http_response = "";
+            httpResponse = "";
 
             StringBuilder sb = new StringBuilder();
 
@@ -27,6 +25,7 @@ namespace LinguaLeoSticker
             HttpWebRequest request = (HttpWebRequest)
             WebRequest.Create(url);
             request.CookieContainer = cookie;
+            int count = 0;
             try
             {
 
@@ -37,24 +36,19 @@ namespace LinguaLeoSticker
                 Stream resStream = response.GetResponseStream();
 
 
-                string tempString = null;
-                int count = 0;
-
                 do
                 {
-
-                    count = resStream.Read(buf, 0, buf.Length);
+                    if (resStream != null) count = resStream.Read(buf, 0, buf.Length);
 
                     if (count != 0)
                     {
-
-                        tempString = Encoding.UTF8.GetString(buf, 0, count);
+                        var tempString = Encoding.UTF8.GetString(buf, 0, count);
 
                         sb.Append(tempString);
                     }
                 } while (count > 0);
 
-                http_response = sb.ToString();
+                httpResponse = sb.ToString();
 
                 return true;
             }
@@ -67,15 +61,15 @@ namespace LinguaLeoSticker
 
         public void Auth(string email, string password)
         {
-            string response = "";
+            string response;
 
-            if (WriteHttpRequest(api_url + string.Format("api/login?email={0}&password={1}", email, password), out response, ref _cookie) == true)
+            if (WriteHttpRequest($"{ApiUrl}{$"api/login?email={email}&password={password}"}", out response, ref _cookie))
             {
-                string error_msg = "";
+                string errorMsg = "";
                 try
                 {
-                    dynamic api_response = JsonConvert.DeserializeObject(response);
-                    error_msg = api_response.error_msg;
+                    dynamic apiResponse = JsonConvert.DeserializeObject(response);
+                    errorMsg = apiResponse.error_msg;
                 }
                 catch (Exception ex)
                 {
@@ -83,167 +77,109 @@ namespace LinguaLeoSticker
                 }
                 finally
                 {
-                    if (error_msg != "")
+                    if (errorMsg != "")
                     {
-                        throw new System.ArgumentException(error_msg);
+                        throw new ArgumentException(errorMsg);
                     }
                     else
                     {
-                        _is_auth = true;
+                        IsAuth = true;
                     }
                 }
             }
         }
 
-        public void GetUserDict(out string[] user_dict)
+        public void GetUserDict(out string[] userDict)
         {
-            //debug todo del
-            if (true)
-            {
-                GetUserDictImpl1(out user_dict);
-            }
-            else
-            {
-                GetUserDictImpl2(out user_dict);
-            }
-
+            GetUserDictImpl1(out userDict);        
         }
 
-        private void GetUserDictImpl1(out string[] user_dict)
+        private void GetUserDictImpl1(out string[] userDict)
         {
-            string response = "";
-            user_dict = null;
+            string response;
+            userDict = null;
             List<string> dict = new List<string>();
 
             //return only 400 word, sorted by Id, research:param
-            if (WriteHttpRequest(api_url + "userdict", out response, ref _cookie))
+            if (WriteHttpRequest(ApiUrl + "userdict", out response, ref _cookie))
             {
-                dynamic api_response = JsonConvert.DeserializeObject(response);
+                dynamic apiResponse = JsonConvert.DeserializeObject(response);
 
-                string error_msg = api_response.error_msg;
-                if (error_msg != "")
+                string errorMsg = apiResponse.error_msg;
+                if (errorMsg != "")
                 {
-                    throw new System.ArgumentException(error_msg);
+                    throw new ArgumentException(errorMsg);
                 }
                 else
                 {
-                    for (int i = 0; i < api_response.words.Count; i++)
+                    for (int i = 0; i < apiResponse.words.Count; i++)
                     {
-                        string word = api_response.words[i].word_value;
-                        string tword = api_response.words[i].translate_value;
+                        string word = apiResponse.words[i].word_value;
+                        string tword = apiResponse.words[i].translate_value;
 
-                        dict.Add(string.Format("{0}:{1}", word.ToLower(), tword.ToLower()));
+                        dict.Add($"{word.ToLower()}:{tword.ToLower()}");
                     }
 
                 }
 
-                user_dict = dict.ToArray();
+                userDict = dict.ToArray();
             }
         }
     
-
-        private void GetUserDictImpl2(out string[] user_dict)
-        {
-            string response = "";
-            user_dict = null;
-
-            List<string> list_dict = new List<string>();
-
-            //new words
-            //string url = "http://lingualeo.com/ru/userdict/json?sortBy=date&wordType=1&filter=no_translate&page=1&groupId=dictionary";
-            //100 words on page
-            string url = "http://lingualeo.com/ru/userdict/json?sortBy=date&filter=all&page=2";
-
-            if (WriteHttpRequest(url, out response, ref _cookie))
-            {
-                dynamic api_response = JsonConvert.DeserializeObject(response);
-
-                if (api_response.error_msg != "")
-                {
-                    string error_msg = api_response.error_msg;
-
-                    throw new System.ArgumentException(error_msg);
-                }
-                else
-                {
-
-                    for (int i = 0; i < api_response.userdict3.Count; i++)
-                    {
-                        var dict = api_response.userdict3[i];
-
-                        for (int j = 0; j < (int)dict.count; j++)
-                        {
-                            try
-                            {
-                                string word = dict.words[j].word_value;
-                                string tword = dict.words[j].user_translates[0].translate_value;
-
-                                list_dict.Add(string.Format("{0}:{1}", word.ToLower(), tword.ToLower()));
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.ToString());
-                            }
-                        }
-                    }
-
-                    user_dict = list_dict.ToArray();
-                }
-            }
-        }
-
         public void AddWord(string word, string tword, string context)
         {
-            string response = "";
+            string response;
 
-            string url_parsams = string.Format("api/addword?word={0}&tword={1}&context={2}", word.ToLower(), tword.ToLower(), context);
-            if (WriteHttpRequest(api_url + url_parsams, out response, ref _cookie))
+            var urlParsams = $"api/addword?word={word.ToLower()}&tword={tword.ToLower()}&context={context}";
+            if (WriteHttpRequest(ApiUrl + urlParsams, out response, ref _cookie))
             {
-                dynamic api_response = JsonConvert.DeserializeObject(response);
+                dynamic apiResponse = JsonConvert.DeserializeObject(response);
+                if (apiResponse == null) throw new ArgumentNullException(nameof(apiResponse));
 
-                if (api_response.error_msg != "")                
+                if (apiResponse.error_msg != "")                
                 {
-                    string error_msg = api_response.error_msg;
-                    throw new System.ArgumentException(error_msg);                    
+                    string errorMsg = apiResponse.error_msg;
+                    if (errorMsg == null) throw new ArgumentNullException(nameof(errorMsg));
+                    throw new ArgumentException(errorMsg);                    
                 }
             }
         }
 
         public string GetTranslate(string word)
         {
-            const string error_msg = "Error, cant get translation!";
-            string response = "";
+            string response;
 
-            if (WriteHttpRequest(api_url + "gettranslates?word=" + word, out response, ref _cookie) == true)
+            if (WriteHttpRequest(ApiUrl + "gettranslates?word=" + word, out response, ref _cookie))
             {
                 try
                 {
 
 
-                    dynamic api_response = JsonConvert.DeserializeObject(response);
+                    dynamic apiResponse = JsonConvert.DeserializeObject(response);
+                    if (apiResponse == null) throw new ArgumentNullException(nameof(apiResponse));
 
-                    if (api_response.error_msg == "")
+                    if (apiResponse.error_msg == "")
                     {
-                        return api_response.translate[0].value;
+                        return apiResponse.translate[0].value;
                     }
                     else
                     {
-                        return api_response.error_msg;
+                        return apiResponse.error_msg;
                     }
                 }
                 catch(Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
-                    return error_msg;
+                    return "Error, cant get translation!";
                 }
             }
 
-            return error_msg;
+            return "Error, cant get translation!";
         }
 
         public bool is_Auth()
         {
-            return _is_auth;
+            return IsAuth;
         }
 
     }

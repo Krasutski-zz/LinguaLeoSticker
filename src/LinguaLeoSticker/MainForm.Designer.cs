@@ -1,6 +1,6 @@
 ﻿namespace LinguaLeoSticker
 {
-    partial class frmSticker
+    partial class FrmSticker
     {
         /// <summary>
         /// Требуется переменная конструктора.
@@ -128,10 +128,11 @@
             this.btn_Forward.UseVisualStyleBackColor = true;
             this.btn_Forward.Click += new System.EventHandler(this.btn_Forward_Click);
             // 
-            // frmSticker
+            // FrmSticker
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(45)))), ((int)(((byte)(68)))));
             this.ClientSize = new System.Drawing.Size(355, 289);
             this.Controls.Add(this.btn_Forward);
             this.Controls.Add(this.btn_Delete);
@@ -145,7 +146,7 @@
             this.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "frmSticker";
+            this.Name = "FrmSticker";
             this.ShowInTaskbar = false;
             this.Text = "LinguaLeoSticker";
             this.TopMost = true;

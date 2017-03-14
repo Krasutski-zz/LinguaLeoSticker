@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-using System.IO;
-using System.Drawing;
 using System.ComponentModel;
+using System.Drawing;
+using System.IO;
+using System.Xml.Serialization;
 
-namespace ConfigFile
+namespace LinguaLeoSticker
 {
 
     public struct ParamList
@@ -32,7 +29,7 @@ namespace ConfigFile
 
     class Config
     {
-        private string FileName;
+        private readonly string _fileName;
 
         public int X { get; set; }
         public int Y { get; set; }
@@ -89,7 +86,7 @@ namespace ConfigFile
 
         public Config(string file)
         {
-            FileName = file;
+            _fileName = file;
 
             X = 100;
             Y = 100;
@@ -112,9 +109,8 @@ namespace ConfigFile
             {
 
                 XmlSerializer deserializer = new XmlSerializer(typeof(ParamList));
-                StreamReader reader = new StreamReader(FileName);
-                ParamList config;
-                config = (ParamList)deserializer.Deserialize(reader);
+                StreamReader reader = new StreamReader(_fileName);
+                var config = (ParamList)deserializer.Deserialize(reader);
                 reader.Close();
 
                 X = config.X;
@@ -152,32 +148,34 @@ namespace ConfigFile
 
     
 
-        public void saveConfig()
+        public void SaveConfig()
         {
             try
             {
 
-                ParamList config = new ParamList();
+                ParamList config = new ParamList
+                {
+                    X = X,
+                    Y = Y,
+                    Width = Width,
+                    Height = Height,
+                    BackgroundColor = BackgroundColorConvert,
+                    TextColor = TextColorConvert,
+                    TextTranslateColor = TextTranslateColorConvert,
+                    TimeText = TimeText,
+                    TimeTextTranslate = TimeTextTranslate,
+                    DictonaryPath = DictonaryPath,
+                    TextFont = TextFontConvert,
+                    TextTranslateFont = TextTranslateFontConvert,
+                    AutoLoad = AutoLoad,
+                    LinguaLeoUser = LinguaLeoUser,
+                    LinguaLeoPassword = LinguaLeoPassword,
+                    RandomMode = RandomMode
+                };
 
-                config.X = X;
-                config.Y = Y;
-                config.Width = Width;
-                config.Height = Height;
-                config.BackgroundColor = BackgroundColorConvert;
-                config.TextColor = TextColorConvert;
-                config.TextTranslateColor = TextTranslateColorConvert;
-                config.TimeText = TimeText;
-                config.TimeTextTranslate = TimeTextTranslate;
-                config.DictonaryPath = DictonaryPath;
-                config.TextFont = TextFontConvert;
-                config.TextTranslateFont = TextTranslateFontConvert;
-                config.AutoLoad = AutoLoad;
-                config.LinguaLeoUser = LinguaLeoUser;
-                config.LinguaLeoPassword = LinguaLeoPassword;
-                config.RandomMode = RandomMode;
 
                 XmlSerializer ser = new XmlSerializer(typeof(ParamList));
-                StreamWriter writer = new StreamWriter(FileName);
+                StreamWriter writer = new StreamWriter(_fileName);
                 ser.Serialize(writer, config);
                 writer.Close();
             }
